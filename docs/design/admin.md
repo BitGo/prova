@@ -62,7 +62,7 @@ A provisioning key may be used to authorize and revoke WSP keys and Validator ke
 
 ### Key IDs
 
-To enable shorter bare MultiSig style addresses, and as a defensive mechanism for potential use in future hard forks, RMG uses 4-byte key ids for WSP keys. These short IDs map back into a record on the chain of WSP public keys.
+To enable shorter bare multi-sig style addresses, and as a defensive mechanism for potential use in future hard forks, RMG uses 4-byte key ids for WSP keys. These short IDs map back into a record on the chain of WSP public keys.
 
 When a provisioning transaction adds a WSP public key to the list of authorized WSP keys, the transaction includes a 4-byte key id. The key id specified in the provisioning of a WSP key must be determined by incrementing the previous highest key id and incrementing it by one, or in the absence of a previous key id, it must be one.
 
@@ -115,7 +115,7 @@ WSP_KEY_REVOKE <wsp pub key> <key id>
 When encoded into a transaction, the operations and their keys will be represented as:
 
 ```
-<operation (1-byte)> <compressed public key (33-bytes)> <key id (only for WSPs): 4-bytes>
+<operation (1 byte)> <compressed public key (33-bytes)> <key id (only for WSPs): 4-bytes>
 ```
 
 ### Example Transaction
@@ -183,7 +183,7 @@ In a future iteration or as an optimization, the consensus state can be condense
 - Only one admin operation output is permitted in a transaction. Aside from the exceptions for issuance, no non-admin outputs and inputs are allowed in an admin transaction.
 - The admin thread output and inputs must always exist at the zero index.
 - All admin transactions must be present in the block chain for 100 blocks before they go into effect.
-- Admin transactions must have an associated admin-operation, empty transactions are not valid.
+- Admin transactions must have an associated administrator operation, empty transactions are not valid.
 - Aside from issuance outputs, all admin transactions must have 0 value inputs and 0 value outputs.
 
 ## Memory Pool Ordering
