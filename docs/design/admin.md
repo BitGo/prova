@@ -6,7 +6,7 @@ This document describes extensions to update the administrative state layer of t
 
 RMG is a Bitcoin-derivative consensus system that includes a blockchain mechanism to provide for updates to a synchronized ledger. The synchronized state of the Bitcoin blockchain consists of its UTXO set and other states such as hashing difficulty and block subsidy.
 
-For a permissioned block chain like the RMG chain, the set of mutable chain states Bitcoin provides for is not sufficient: Bitcoin is a permissionless system and lacks any mutable permission states beyond fund ownership. In RMG issuance of funds, permissioning of block publishing, and other administrative functions need various special operations and provisioning. To that end, the following special high level administrative keys are defined:
+For a permissioned block chain like the RMG chain, the set of mutable chain states Bitcoin provides for is not sufficient: Bitcoin is a permissible system and lacks any mutable permission states beyond fund ownership. In RMG issuance of funds, permitting of block publishing, and other administrative functions need various special operations and provisioning. To that end, the following special high level administrative keys are defined:
 
 - **Root:**   Approve and revoke provisioning and issuing keys.
 - **Provisioning:**   Provision and revoke Validator and WSP keys.
@@ -62,9 +62,9 @@ A provisioning key may be used to authorize and revoke WSP keys and Validator ke
 
 ### Key IDs
 
-To enable shorter bare multisig style addresses, and as a defensive mechanism for potential use in future hard forks, RMG uses 4 byte key ids for WSP keys. These short IDs map back into a record on the chain of WSP public keys.
+To enable shorter bare MultiSig style addresses, and as a defensive mechanism for potential use in future hard forks, RMG uses 4-byte key ids for WSP keys. These short IDs map back into a record on the chain of WSP public keys.
 
-When a provisioning transaction adds a WSP public key to the list of authorized WSP keys, the transaction includes a 4 byte key id. The key id specified in the provisioning of a WSP key must be determined by incrementing the previous highest key id and incrementing it by one, or in the absence of a previous key id, it must be one.
+When a provisioning transaction adds a WSP public key to the list of authorized WSP keys, the transaction includes a 4-byte key id. The key id specified in the provisioning of a WSP key must be determined by incrementing the previous highest key id and incrementing it by one, or in the absence of a previous key id, it must be one.
 
 Key IDs are only relevant for WSP Keys, not Validate Keys.
 
@@ -94,12 +94,12 @@ A thread transaction contains:
 
 - Exactly 1 input spending the unspent output (tip) of the last thread transaction.
 - Exactly 1 output creating the new tip of the thread.
-- One or more outputs containing operations to modify the state, represented as special provably-unspendable outputs.
+- One or more outputs containing operations to modify the state, represented as special provably unspendable outputs.
 - The keys and signatures authorizing the action.
 
 ### Key Operations
 
-To modify the admin state, admin transactions include outputs with unspendable `OP_RETURN` outputs of serialized state change statements. The possible statements include:
+To modify the admin state, admin transactions include outputs with provably unspendable `OP_RETURN` outputs of serialized state change statements. The possible statements include:
 
 ```
 ISSUING_KEY_ADD <issuing pub key>
@@ -115,7 +115,7 @@ WSP_KEY_REVOKE <wsp pub key> <key id>
 When encoded into a transaction, the operations and their keys will be represented as:
 
 ```
-<operation (1 byte)> <compressed public key (33 bytes)> <key id (only for WSPs): 4 bytes>
+<operation (1-byte)> <compressed public key (33-bytes)> <key id (only for WSPs): 4-bytes>
 ```
 
 ### Example Transaction
@@ -137,7 +137,7 @@ The first output serves as the hook for the next transaction in the thread. The 
 
 The opcode `OP_CHECK_THREAD` then enforces that this output can only be spent by keys out of the current set of keys (root keys, in this example).
 
-The second output contains the admin operation: add the given public key to the set of authorized provisioning keys. It is preceded by `OP_RETURN`, marking it as an unspendable output followed by some application specific, non-utxo impacting data.
+The second output contains the admin operation: add the given public key to the set of authorized provisioning keys. It is preceded by `OP_RETURN`, marking it as an unspendable output followed by some application specific, non-UTXO impacting data.
 
 ### Issuance
 
@@ -183,11 +183,11 @@ In a future iteration or as an optimization, the consensus state can be condense
 - Only one admin operation output is permitted in a transaction. Aside from the exceptions for issuance, no non-admin outputs and inputs are allowed in an admin transaction.
 - The admin thread output and inputs must always exist at the zero index.
 - All admin transactions must be present in the block chain for 100 blocks before they go into effect.
-- Admin transactions must have an associated admin operation, empty transactions are not valid.
+- Admin transactions must have an associated admin-operation, empty transactions are not valid.
 - Aside from issuance outputs, all admin transactions must have 0 value inputs and 0 value outputs.
 
-## Mempool Ordering
+## Memory Pool Ordering
 
-Any admin action always takes precedence in the mempool. This helps prevent a situation where the network is busy, potentially due to a DOS from a compromised co-signer key and the confirmation of the admin action takes longer than expected.
+Any admin action always takes precedence in the memory pool. This helps prevent a situation where the network is busy, potentially due to a DOS from a compromised co-signer key and the confirmation of the admin action takes longer than expected.
 
 
