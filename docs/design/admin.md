@@ -6,7 +6,7 @@ This document describes extensions to update the administrative state layer of t
 
 RMG is a Bitcoin-derivative consensus system that includes a blockchain mechanism to provide for updates to a synchronized ledger. The synchronized state of the Bitcoin blockchain consists of its UTXO set and other states such as hashing difficulty and block subsidy.
 
-For a permissioned block chain like the RMG chain, the set of mutable chain states Bitcoin provides for is not sufficient: Bitcoin is a permissible system and lacks any mutable permission states beyond fund ownership. In RMG issuance of funds, permitting of block publishing, and other administrative functions need various special operations and provisioning. To that end, the following special high level administrative keys are defined:
+For a permissioned block chain like the RMG chain, the set of mutable chain states Bitcoin provides for is not sufficient: Bitcoin is a permissionless system and lacks any mutable permission states beyond fund ownership. In RMG issuance of funds, permissioning of block publishing, and other administrative functions need various special operations and provisioning. To that end, the following special high level administrative keys are defined:
 
 - **Root:**   Approve and revoke provisioning and issuing keys.
 - **Provisioning:**   Provision and revoke Validator and WSP keys.
@@ -183,7 +183,7 @@ In a future iteration or as an optimization, the consensus state can be condense
 - Only one admin operation output is permitted in a transaction. Aside from the exceptions for issuance, no non-admin outputs and inputs are allowed in an admin transaction.
 - The admin thread output and inputs must always exist at the zero index.
 - All admin transactions must be present in the block chain for 100 blocks before they go into effect.
-- Admin transactions must have an associated administrator operation, empty transactions are not valid.
+- Admin transactions must have an associated admin op, empty transactions are not valid.
 - Aside from issuance outputs, all admin transactions must have 0 value inputs and 0 value outputs.
 
 ## Memory Pool Ordering
