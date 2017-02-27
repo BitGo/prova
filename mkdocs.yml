@@ -1,0 +1,29 @@
+#
+# Configuration file for mkdocs-style documentation.
+# See http://www.mkdocs.org/
+#
+# Install:
+#    pip install mkdocs
+#
+# Run:
+#    mkdocs serve     // start a local webserver to run documentation
+#
+
+site_name: Prova
+repo_url: https://github.com/BitGo/rmgd/
+strict: True
+pages:
+    - Welcome To Prova: index.md
+    - Architecture: architecture.md
+    - For Developers:
+        - Getting Started: install-guide.md
+        - Coding Guidelines: code_contribution_guidelines.md
+        - Design Documents:
+            - Prova Block Format: design/block_format.md
+            - Required Multisig: design/safe_multisig.md
+            - Admin Transactions: design/admin.md
+            - Validator Rate Limiter: design/rate_limiter.md
+            - Proof of Work Alternatives: design/hashfuncs.md
+            - Admin API: admin-api.md
+            - Raw Tx Examples: example/rawtx.md
+theme: readthedocs
