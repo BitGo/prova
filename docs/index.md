@@ -20,7 +20,7 @@ community to track releases, contribute, and get updates on development status.
 
 * Dynamic Asset Issuance
 
-Asset issuance in Prova is done centrally.  The asset issuer's sole responsibility in prova is to
+Asset issuance in Prova is done centrally.  The asset issuer's sole responsibility in Prova is to
 create and destroy the asset via newly introduced "admin transactions".  These transactions are public
 on the ledger and visible to all participants in the system.
 
@@ -40,7 +40,6 @@ features, but for the initial version, a key decision was to use known, battle-t
 Prova takes extra precautions to ensure the digital asset cannot be easily lost.  All Prova Accounts are
 equipped with a backup key and require at least two signatures for security. Further, it is not possible to
 send to a non-recoverable Prova Account in the system, making it hard to lose control of an asset.
-
 
 # Who Created Prova?
 
