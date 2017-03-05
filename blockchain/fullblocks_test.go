@@ -67,6 +67,20 @@ func TestFullBlocks(t *testing.T) {
 				item.IsOrphan)
 		}
 
+		// Check Thread Tips
+		if chain.ThreadTips()[rmgutil.RootThread].String() != item.ThreadTips[rmgutil.RootThread].String() {
+			t.Fatalf("block %q (hash %s, height %d) should "+
+				"have threadTips %v, got %v", item.Name, block.Hash(),
+				blockHeight, item.ThreadTips[rmgutil.RootThread], chain.ThreadTips()[rmgutil.RootThread])
+		}
+
+		// Check Total Supply
+		if chain.TotalSupply() != item.TotalSupply {
+			t.Fatalf("block %q (hash %s, height %d) should "+
+				"have totalSupply %v, got %v", item.Name, block.Hash(),
+				blockHeight, item.TotalSupply, chain.TotalSupply())
+		}
+
 		// Check ROOT KEYS
 		if item.IsMainChain && !item.AdminKeySets[btcec.RootKeySet].Equal(chain.AdminKeySets()[btcec.RootKeySet]) {
 			t.Fatalf("block %q (hash %s, height %d) should "+
@@ -97,16 +111,10 @@ func TestFullBlocks(t *testing.T) {
 				chain.AdminKeySets()[btcec.IssueKeySet].ToStringArray())
 		}
 		// Check KeyIDs
-		if item.IsMainChain && !item.WspKeyIdMap.Equal(chain.KeyIDs()) {
+		if item.IsMainChain && !item.ASPKeyIdMap.Equal(chain.KeyIDs()) {
 			t.Fatalf("block %q (hash %s, height %d) should "+
 				"have keyID %x, got %v", item.Name, block.Hash(),
-				blockHeight, item.WspKeyIdMap, chain.KeyIDs())
-		}
-		// Check Total Supply
-		if chain.TotalSupply() != item.TotalSupply {
-			t.Fatalf("block %q (hash %s, height %d) should "+
-				"have totalSupply %v, got %v", item.Name, block.Hash(),
-				blockHeight, item.TotalSupply, chain.TotalSupply())
+				blockHeight, item.ASPKeyIdMap, chain.KeyIDs())
 		}
 	}
 

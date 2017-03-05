@@ -226,7 +226,7 @@ func (m *CPUMiner) solveBlock(msgBlock *wire.MsgBlock, blockHeight uint32,
 		// hash is actually a double sha256 (two hashes), so
 		// increment the number of hashes completed for each
 		// attempt accordingly.
-		// TODO(aztec) update this to reflect new hash function
+		// TODO(prova) update this to reflect new hash function
 		header.Nonce = i
 		hash := header.BlockHash()
 		hashesCompleted += 2
@@ -266,7 +266,7 @@ out:
 			// Non-blocking select to fall through
 		}
 
-		// TODO(aztec): re-enable later, this cuts off mining when
+		// TODO(prova): re-enable later, this cuts off mining when
 		// no other peers are present.
 		//
 		// Wait until there is a connection to at least one other peer

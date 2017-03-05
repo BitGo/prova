@@ -132,52 +132,50 @@ type commandHandler func(*rpcServer, interface{}, <-chan struct{}) (interface{},
 // a dependency loop.
 var rpcHandlers map[string]commandHandler
 var rpcHandlersBeforeInit = map[string]commandHandler{
-	"addnode":                   handleAddNode,
-	"createrawtransaction":      handleCreateRawTransaction,
-	"createrawadmintransaction": handleCreateRawAdminTransaction,
-	"debuglevel":                handleDebugLevel,
-	"decoderawtransaction":      handleDecodeRawTransaction,
-	"decodescript":              handleDecodeScript,
-	"generate":                  handleGenerate,
-	"getaddednodeinfo":          handleGetAddedNodeInfo,
-	"getaddresstxids":           handleGetAddressTxIds,
-	"getadmininfo":              handleGetAdminInfo,
-	"getbestblock":              handleGetBestBlock,
-	"getbestblockhash":          handleGetBestBlockHash,
-	"getblock":                  handleGetBlock,
-	"getblockcount":             handleGetBlockCount,
-	"getblockhash":              handleGetBlockHash,
-	"getblockheader":            handleGetBlockHeader,
-	"getblocktemplate":          handleGetBlockTemplate,
-	"getconnectioncount":        handleGetConnectionCount,
-	"getcurrentnet":             handleGetCurrentNet,
-	"getdifficulty":             handleGetDifficulty,
-	"getgenerate":               handleGetGenerate,
-	"gethashespersec":           handleGetHashesPerSec,
-	"getinfo":                   handleGetInfo,
-	"getmempoolinfo":            handleGetMempoolInfo,
-	"getmininginfo":             handleGetMiningInfo,
-	"getnettotals":              handleGetNetTotals,
-	"getnetworkhashps":          handleGetNetworkHashPS,
-	"getpeerinfo":               handleGetPeerInfo,
-	"getrawmempool":             handleGetRawMempool,
-	"getrawtransaction":         handleGetRawTransaction,
-	"gettxout":                  handleGetTxOut,
-	"getwork":                   handleGetWork,
-	"help":                      handleHelp,
-	"node":                      handleNode,
-	"ping":                      handlePing,
-	"prepareaztectransaction": handlePrepareAztecTransaction,
-	"searchrawtransactions":   handleSearchRawTransactions,
-	"sendrawtransaction":      handleSendRawTransaction,
-	"setgenerate":             handleSetGenerate,
-	"setvalidatekeys":         handleSetValidateKeys,
-	"signaztectransaction":    handleSignAztecTransaction,
-	"stop":                    handleStop,
-	"submitblock":             handleSubmitBlock,
-	"validateaddress":         handleValidateAddress,
-	"verifychain":             handleVerifyChain,
-	"verifymessage":           handleVerifyMessage,
+	"addnode":               handleAddNode,
+	"createrawtransaction":  handleCreateRawTransaction,
+	"debuglevel":            handleDebugLevel,
+	"decoderawtransaction":  handleDecodeRawTransaction,
+	"decodescript":          handleDecodeScript,
+	"generate":              handleGenerate,
+	"getaddednodeinfo":      handleGetAddedNodeInfo,
+	"getaddresstxids":       handleGetAddressTxIds,
+	"getadmininfo":          handleGetAdminInfo,
+	"getbestblock":          handleGetBestBlock,
+	"getbestblockhash":      handleGetBestBlockHash,
+	"getblock":              handleGetBlock,
+	"getblockcount":         handleGetBlockCount,
+	"getblockhash":          handleGetBlockHash,
+	"getblockheader":        handleGetBlockHeader,
+	"getblocktemplate":      handleGetBlockTemplate,
+	"getconnectioncount":    handleGetConnectionCount,
+	"getcurrentnet":         handleGetCurrentNet,
+	"getdifficulty":         handleGetDifficulty,
+	"getgenerate":           handleGetGenerate,
+	"gethashespersec":       handleGetHashesPerSec,
+	"getinfo":               handleGetInfo,
+	"getmempoolinfo":        handleGetMempoolInfo,
+	"getmininginfo":         handleGetMiningInfo,
+	"getnettotals":          handleGetNetTotals,
+	"getnetworkhashps":      handleGetNetworkHashPS,
+	"getpeerinfo":           handleGetPeerInfo,
+	"getrawmempool":         handleGetRawMempool,
+	"getrawtransaction":     handleGetRawTransaction,
+	"gettxout":              handleGetTxOut,
+	"getwork":               handleGetWork,
+	"help":                  handleHelp,
+	"node":                  handleNode,
+	"ping":                  handlePing,
+	"searchrawtransactions": handleSearchRawTransactions,
+	"sendrawtransaction":    handleSendRawTransaction,
+	"setgenerate":           handleSetGenerate,
+	"setvalidatekeys":       handleSetValidateKeys,
+	"signprovatransaction":  handleSignProvaTransaction,
+	"stop":                  handleStop,
+	"submitblock":           handleSubmitBlock,
+	"validateaddress":       handleValidateAddress,
+	"verifychain":           handleVerifyChain,
+	"verifymessage":         handleVerifyMessage,
 }
 
 // list of commands that we recognize, but for which btcd has no support because
@@ -251,31 +249,30 @@ var rpcLimited = map[string]struct{}{
 	"help": {},
 
 	// HTTP/S-only commands
-	"createrawtransaction":    {},
-	"decoderawtransaction":    {},
-	"decodescript":            {},
-	"getaddresstxids":         {},
-	"getadmininfo":            {},
-	"getbestblock":            {},
-	"getbestblockhash":        {},
-	"getblock":                {},
-	"getblockcount":           {},
-	"getblockhash":            {},
-	"getcurrentnet":           {},
-	"getdifficulty":           {},
-	"getinfo":                 {},
-	"getnettotals":            {},
-	"getnetworkhashps":        {},
-	"getrawmempool":           {},
-	"getrawtransaction":       {},
-	"gettxout":                {},
-	"prepareaztectransaction": {},
-	"searchrawtransactions":   {},
-	"sendrawtransaction":      {},
-	"signaztectransaction":    {},
-	"submitblock":             {},
-	"validateaddress":         {},
-	"verifymessage":           {},
+	"createrawtransaction":  {},
+	"decoderawtransaction":  {},
+	"decodescript":          {},
+	"getaddresstxids":       {},
+	"getadmininfo":          {},
+	"getbestblock":          {},
+	"getbestblockhash":      {},
+	"getblock":              {},
+	"getblockcount":         {},
+	"getblockhash":          {},
+	"getcurrentnet":         {},
+	"getdifficulty":         {},
+	"getinfo":               {},
+	"getnettotals":          {},
+	"getnetworkhashps":      {},
+	"getrawmempool":         {},
+	"getrawtransaction":     {},
+	"gettxout":              {},
+	"searchrawtransactions": {},
+	"sendrawtransaction":    {},
+	"signprovatransaction":  {},
+	"submitblock":           {},
+	"validateaddress":       {},
+	"verifymessage":         {},
 }
 
 // builderScript is a convenience function which is used for hard-coded scripts
@@ -527,142 +524,6 @@ func messageToHex(msg wire.Message) (string, error) {
 	return hex.EncodeToString(buf.Bytes()), nil
 }
 
-// handleCreateRawAdminTransaction handles createrawadmintransaction commands.
-func handleCreateRawAdminTransaction(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
-	c := cmd.(*btcjson.CreateRawAdminTransactionCmd)
-
-	// Admin tx requires spending a past admin output, always at index 0.
-	txHash, err := chainhash.NewHashFromStr(c.Txid)
-	if err != nil {
-		return nil, rpcDecodeHexError(c.Txid)
-	}
-	spendOutPoint := wire.NewOutPoint(txHash, uint32(0))
-
-	// Determine the admin thread id and op code from the key type.
-	keyType := c.KeyType
-	active := c.Active
-	var op byte
-	var threadID rmgutil.ThreadID
-	switch {
-	case keyType == "issuing" && active:
-		op = txscript.AdminOpIssueKeyAdd
-		threadID = rmgutil.RootThread
-	case keyType == "issuing" && !active:
-		op = txscript.AdminOpIssueKeyRevoke
-		threadID = rmgutil.RootThread
-	case keyType == "provisioning" && active:
-		op = txscript.AdminOpProvisionKeyAdd
-		threadID = rmgutil.RootThread
-	case keyType == "provisioning" && !active:
-		op = txscript.AdminOpProvisionKeyRevoke
-		threadID = rmgutil.RootThread
-	case keyType == "wsp" && active:
-		op = txscript.AdminOpWSPKeyAdd
-		threadID = rmgutil.ProvisionThread
-	case keyType == "wsp" && !active:
-		op = txscript.AdminOpWSPKeyRevoke
-		threadID = rmgutil.ProvisionThread
-	case keyType == "validate" && active:
-		op = txscript.AdminOpValidateKeyAdd
-		threadID = rmgutil.ProvisionThread
-	case keyType == "validate" && !active:
-		op = txscript.AdminOpValidateKeyRevoke
-		threadID = rmgutil.ProvisionThread
-	default:
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCType,
-			Message: "Invalid keytype",
-		}
-	}
-
-	// Confirm that a key id is assigned to the WSP change.
-	if keyType == "wsp" && c.KeyId == nil {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInvalidAddressOrKey,
-			Message: "WSP admin transactions require a key id",
-		}
-	}
-
-	// Parse the supplied admin public key.
-	pubKeyBytes, err := hex.DecodeString(c.PubKey)
-	if err != nil {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInvalidAddressOrKey,
-			Message: "Invalid public key hex. " + err.Error(),
-		}
-	}
-	pubKey, err := btcec.ParsePubKey(pubKeyBytes, btcec.S256())
-	if err != nil {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInvalidAddressOrKey,
-			Message: "Invalid public key bytes. " + err.Error(),
-		}
-	}
-
-	mtx := wire.NewMsgTx()
-
-	// Add the previous admin output as an input.
-	mtx.AddTxIn(&wire.TxIn{
-		PreviousOutPoint: *spendOutPoint,
-		Sequence:         wire.MaxTxInSequenceNum,
-		SignatureScript:  nil,
-	})
-	txValue := int64(0) // normal admin transactions have zero value
-
-	// Add the thread id to use for this transaction.
-	threadBuilder := txscript.NewScriptBuilder()
-	threadScript, err := threadBuilder.
-		AddInt64(int64(threadID)).
-		AddOp(txscript.OP_CHECKTHREAD).Script()
-	if err != nil {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCMisc,
-			Message: "Build thread script error: " + err.Error(),
-		}
-	}
-	mtx.AddTxOut(wire.NewTxOut(txValue, threadScript))
-
-	// Craft the admin statement to use for this transaction.
-	// This looks like [1 byte op code][33 bytes compressed public key]
-	adminStatementDataSize := 1 + btcec.PubKeyBytesLenCompressed
-	if keyType == "wsp" {
-		// WSP adds need an extra appended 4 byte keyid
-		adminStatementDataSize += btcec.KeyIDSize
-	}
-	adminStatementData := make([]byte, adminStatementDataSize)
-	adminStatementData[0] = op
-	copy(adminStatementData[1:], pubKey.SerializeCompressed())
-	if keyType == "wsp" {
-		keyIdBytes := make([]byte, btcec.KeyIDSize)
-		binary.LittleEndian.PutUint32(keyIdBytes, *c.KeyId)
-		keyIdIndex := 1 + btcec.PubKeyBytesLenCompressed
-		copy(adminStatementData[keyIdIndex:], keyIdBytes)
-	}
-
-	// Add the admin provisioning statement as an op_return output.
-	adminScriptBuilder := txscript.NewScriptBuilder()
-	adminScript, err := adminScriptBuilder.
-		AddOp(txscript.OP_RETURN).
-		AddData(adminStatementData).Script()
-	if err != nil {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCMisc,
-			Message: "Build admin script error: " + err.Error(),
-		}
-	}
-	mtx.AddTxOut(wire.NewTxOut(txValue, adminScript))
-
-	// Return the serialized and hex-encoded transaction.  Note that this
-	// is intentionally not directly returning because the first return
-	// value is a string and it would result in returning an empty string to
-	// the client instead of nothing (nil) in the case of an error.
-	mtxHex, err := messageToHex(mtx)
-	if err != nil {
-		return nil, err
-	}
-	return mtxHex, nil
-}
-
 // handleCreateRawTransaction handles createrawtransaction commands.
 func handleCreateRawTransaction(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
 	c := cmd.(*btcjson.CreateRawTransactionCmd)
@@ -773,110 +634,6 @@ type addressToKey struct {
 	compressed bool
 }
 
-// handlePrepareAztecTransaction handles prepareaztectransaction commands.
-func handlePrepareAztecTransaction(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
-	c := cmd.(*btcjson.PrepareAztecTransactionCmd)
-
-	// Validate the locktime, if given.
-	if c.LockTime != nil &&
-		(*c.LockTime < 0 || *c.LockTime > int64(wire.MaxTxInSequenceNum)) {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInvalidParameter,
-			Message: "Locktime out of range",
-		}
-	}
-
-	// Add all transaction inputs to a new transaction after performing
-	// some validity checks.
-	mtx := wire.NewMsgTx()
-	for _, input := range c.Inputs {
-		txHash, err := chainhash.NewHashFromStr(input.Txid)
-		if err != nil {
-			return nil, rpcDecodeHexError(input.Txid)
-		}
-
-		prevOut := wire.NewOutPoint(txHash, uint32(input.Vout))
-
-		txIn := wire.NewTxIn(prevOut, []byte{})
-		if c.LockTime != nil && *c.LockTime != 0 {
-			txIn.Sequence = wire.MaxTxInSequenceNum - 1
-		}
-		mtx.AddTxIn(txIn)
-	}
-
-	// Add all transaction outputs to the transaction after performing
-	// some validity checks.
-	for encodedAddr, amount := range c.Amounts {
-		// Ensure amount is in the valid range for monetary amounts.
-		if amount <= 0 || amount > rmgutil.MaxAtoms {
-			return nil, &btcjson.RPCError{
-				Code:    btcjson.ErrRPCType,
-				Message: "Invalid amount",
-			}
-		}
-
-		// Decode the provided address.
-		addr, err := rmgutil.DecodeAddress(encodedAddr, activeNetParams.Params)
-		if err != nil {
-			return nil, &btcjson.RPCError{
-				Code:    btcjson.ErrRPCInvalidAddressOrKey,
-				Message: "Invalid address or key: " + err.Error(),
-			}
-		}
-
-		// Ensure the address is one of the supported types and that
-		// the network encoded with the address matches the network the
-		// server is currently on.
-		switch addr.(type) {
-		case *rmgutil.AddressAztec:
-		default:
-			return nil, &btcjson.RPCError{
-				Code:    btcjson.ErrRPCInvalidAddressOrKey,
-				Message: "Invalid address or key",
-			}
-		}
-		if !addr.IsForNet(s.server.chainParams) {
-			return nil, &btcjson.RPCError{
-				Code: btcjson.ErrRPCInvalidAddressOrKey,
-				Message: "Invalid address: " + encodedAddr +
-					" is for the wrong network",
-			}
-		}
-
-		// Create a new script which pays to the provided address.
-		pkScript, err := txscript.PayToAddrScript(addr)
-		if err != nil {
-			context := "Failed to generate pay-to-address script"
-			return nil, internalRPCError(err.Error(), context)
-		}
-
-		// Convert the amount to atoms.
-		atoms, err := rmgutil.NewAmount(amount)
-		if err != nil {
-			context := "Failed to convert amount"
-			return nil, internalRPCError(err.Error(), context)
-		}
-
-		txOut := wire.NewTxOut(int64(atoms), pkScript)
-		mtx.AddTxOut(txOut)
-	}
-
-	// Set the Locktime, if given.
-	if c.LockTime != nil {
-		mtx.LockTime = uint32(*c.LockTime)
-	}
-
-	// Return the serialized and hex-encoded transaction.  Note that this
-	// is intentionally not directly returning because the first return
-	// value is a string and it would result in returning an empty string to
-	// the client instead of nothing (nil) in the case of an error.
-	mtxHex, err := messageToHex(mtx)
-	if err != nil {
-		return nil, err
-	}
-	return mtxHex, nil
-}
-
 // handleDebugLevel handles debuglevel commands.
 func handleDebugLevel(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
 	c := cmd.(*btcjson.DebugLevelCmd)
@@ -933,6 +690,8 @@ func createVinList(mtx *wire.MsgTx) []btcjson.Vin {
 // transaction.
 func createVoutList(mtx *wire.MsgTx, chainParams *chaincfg.Params, filterAddrMap map[string]struct{}) []btcjson.Vout {
 	voutList := make([]btcjson.Vout, 0, len(mtx.TxOut))
+	threadInt, _ := txscript.GetAdminDetailsMsgTx(mtx)
+	isAdmin := rmgutil.ThreadID(threadInt) == rmgutil.RootThread || rmgutil.ThreadID(threadInt) == rmgutil.ProvisionThread
 	for i, v := range mtx.TxOut {
 		// The disassembled string will contain [error] inline if the
 		// script doesn't fully parse, so ignore the error here.
@@ -975,6 +734,10 @@ func createVoutList(mtx *wire.MsgTx, chainParams *chaincfg.Params, filterAddrMap
 		vout.ScriptPubKey.Type = scriptClass.String()
 		vout.ScriptPubKey.ReqSigs = int32(reqSigs)
 
+		if isAdmin && scriptClass == txscript.NullDataTy {
+			vout.ScriptPubKey.AdminOp = txscript.AdminOpString(v.PkScript)
+		}
+
 		voutList = append(voutList, vout)
 	}
 
@@ -1012,10 +775,10 @@ func createTxRawResult(chainParams *chaincfg.Params, mtx *wire.MsgTx,
 	return txReply, nil
 }
 
-// handleSignAztecTransaction handles signaztectransaction commands.
+// handleSignProvaTransaction handles signprovatransaction commands.
 // Note: this signing method requires in-order signing.
-func handleSignAztecTransaction(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
-	c := cmd.(*btcjson.SignAztecTransactionCmd)
+func handleSignProvaTransaction(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+	c := cmd.(*btcjson.SignProvaTransactionCmd)
 
 	// Deserialize the transaction.
 	hexStr := c.HexTx
@@ -1453,7 +1216,7 @@ func handleGetAddressTxIds(s *rpcServer, cmd interface{}, closeChan <-chan struc
 func handleGetAdminInfo(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
 	best := s.chain.BestSnapshot()
 	adminKeySets := s.chain.AdminKeySets()
-	wspKeyIdMap := s.chain.KeyIDs()
+	aspKeyIdMap := s.chain.KeyIDs()
 	rootTip := s.chain.ThreadTips()[rmgutil.RootThread]
 	provisionTip := s.chain.ThreadTips()[rmgutil.ProvisionThread]
 	issueTip := s.chain.ThreadTips()[rmgutil.IssueThread]
@@ -1474,10 +1237,10 @@ func handleGetAdminInfo(s *rpcServer, cmd interface{}, closeChan <-chan struct{}
 			OutPoint: issueTip.String(),
 		},
 	}
-	wspObj := make([]btcjson.WspKeyIdResult, len(wspKeyIdMap))
+	aspObj := make([]btcjson.ASPKeyIdResult, len(aspKeyIdMap))
 	i := 0
-	for k, v := range wspKeyIdMap {
-		wspObj[i] = btcjson.WspKeyIdResult{
+	for k, v := range aspKeyIdMap {
+		aspObj[i] = btcjson.ASPKeyIdResult{
 			KeyID:  uint32(k),
 			PubKey: hex.EncodeToString(v.SerializeCompressed()),
 		}
@@ -1493,7 +1256,7 @@ func handleGetAdminInfo(s *rpcServer, cmd interface{}, closeChan <-chan struct{}
 		ProvisionKeys: adminKeySets[btcec.ProvisionKeySet].ToStringArray(),
 		IssueKeys:     adminKeySets[btcec.IssueKeySet].ToStringArray(),
 		ValidateKeys:  adminKeySets[btcec.ValidateKeySet].ToStringArray(),
-		WspKeys:       wspObj,
+		ASPKeys:       aspObj,
 	}
 	return result, nil
 }

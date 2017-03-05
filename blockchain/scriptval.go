@@ -83,7 +83,7 @@ out:
 				break out
 			}
 
-			// Before passing the script to the VM, we check whether it is an Aztec script.
+			// Before passing the script to the VM, we check whether it is an Prova script.
 			pops, err := txscript.ParseScript(pkScript)
 			if err != nil {
 				str := fmt.Sprintf("failed to parse script %s: %v", originTxHash, err)
@@ -91,8 +91,8 @@ out:
 				v.sendResult(err)
 				break out
 			}
-			// If script is Aztec script, we replace all keyIDs with pubKeyHashes.
-			if txscript.TypeOfScript(pops) == txscript.AztecTy {
+			// If script is Prova script, we replace all keyIDs with pubKeyHashes.
+			if txscript.TypeOfScript(pops) == txscript.ProvaTy {
 				keyIDs, err := txscript.ExtractKeyIDs(pops)
 				if err != nil {
 					str := fmt.Sprintf("failed to extract keyIDs %s: %v", originTxHash, err)
@@ -117,8 +117,8 @@ out:
 				}
 			}
 
-			// If script is Aztec admin script, we replace the threadID with pubKeyHashes.
-			if txscript.TypeOfScript(pops) == txscript.AztecAdminTy {
+			// If script is Prova admin script, we replace the threadID with pubKeyHashes.
+			if txscript.TypeOfScript(pops) == txscript.ProvaAdminTy {
 				threadID, err := txscript.ExtractThreadID(pops)
 				if err != nil {
 					str := fmt.Sprintf("failed to extract threadID %s: %v", originTxHash, err)

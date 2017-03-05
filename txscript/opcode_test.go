@@ -117,7 +117,7 @@ func TestOpcodeDisasm(t *testing.T) {
 				expectedStr = "OP_NOP" + strconv.Itoa(int(val))
 			}
 
-		// Aztec opcodes
+		// Prova opcodes
 		case opcodeVal == 0xba:
 			expectedStr = "OP_CHECKSAFEMULTISIG"
 		case opcodeVal == 0xbb:
@@ -185,7 +185,7 @@ func TestOpcodeDisasm(t *testing.T) {
 				expectedStr = "OP_NOP" + strconv.Itoa(int(val))
 			}
 
-		// Aztec opcodes
+		// Prova opcodes
 		case opcodeVal == 0xba:
 			expectedStr = "OP_CHECKSAFEMULTISIG"
 		case opcodeVal == 0xbb:

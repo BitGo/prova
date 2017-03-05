@@ -131,7 +131,7 @@ func TestCheckTransactionSanity(t *testing.T) {
 	// Create prova txout
 	keyId1 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 	keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
-	payAddr, _ := rmgutil.NewAddressAztec(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
+	payAddr, _ := rmgutil.NewAddressProva(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
 	provaPkScript, _ := txscript.PayToAddrScript(payAddr)
 	provaTxOut := wire.TxOut{
 		Value:    300,
@@ -155,19 +155,19 @@ func TestCheckTransactionSanity(t *testing.T) {
 		PkScript: adminOpPkScript,
 	}
 	// create root tx out
-	rootPkScript, _ := txscript.AztecThreadScript(rmgutil.RootThread)
+	rootPkScript, _ := txscript.ProvaThreadScript(rmgutil.RootThread)
 	rootTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: rootPkScript,
 	}
 	// create provision tx out
-	provisionPkScript, _ := txscript.AztecThreadScript(rmgutil.ProvisionThread)
+	provisionPkScript, _ := txscript.ProvaThreadScript(rmgutil.ProvisionThread)
 	provisionTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: provisionPkScript,
 	}
 	// create provision tx out
-	issuePkScript, _ := txscript.AztecThreadScript(rmgutil.IssueThread)
+	issuePkScript, _ := txscript.ProvaThreadScript(rmgutil.IssueThread)
 	issueTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: issuePkScript,
@@ -406,7 +406,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 	// Create prova txout
 	keyId1 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 	keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
-	payAddr, _ := rmgutil.NewAddressAztec(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
+	payAddr, _ := rmgutil.NewAddressProva(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
 	provaPkScript, _ := txscript.PayToAddrScript(payAddr)
 	provaTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
@@ -452,7 +452,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 	// Create admin op to add keyID.
 	keyID := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 	data = make([]byte, 1+btcec.PubKeyBytesLenCompressed+btcec.KeyIDSize)
-	data[0] = txscript.AdminOpWSPKeyAdd
+	data[0] = txscript.AdminOpASPKeyAdd
 	copy(data[1:], pubKey.SerializeCompressed())
 	keyID.ToAddressFormat(data[1+btcec.PubKeyBytesLenCompressed:])
 	adminOpAspPkScript, _ := txscript.NewScriptBuilder().AddOp(txscript.OP_RETURN).
@@ -463,7 +463,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 	}
 	// Create admin op to revoke keyID.
 	data = make([]byte, 1+btcec.PubKeyBytesLenCompressed+btcec.KeyIDSize)
-	data[0] = txscript.AdminOpWSPKeyRevoke
+	data[0] = txscript.AdminOpASPKeyRevoke
 	copy(data[1:], pubKey.SerializeCompressed())
 	keyID.ToAddressFormat(data[1+btcec.PubKeyBytesLenCompressed:])
 	adminOpAspRevPkScript, _ := txscript.NewScriptBuilder().AddOp(txscript.OP_RETURN).
@@ -473,13 +473,13 @@ func TestCheckTransactionOutputs(t *testing.T) {
 		PkScript: adminOpAspRevPkScript,
 	}
 	// create root tx out
-	rootPkScript, _ := txscript.AztecThreadScript(rmgutil.RootThread)
+	rootPkScript, _ := txscript.ProvaThreadScript(rmgutil.RootThread)
 	rootTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: rootPkScript,
 	}
 	// create issue tx out
-	issuePkScript, _ := txscript.AztecThreadScript(rmgutil.IssueThread)
+	issuePkScript, _ := txscript.ProvaThreadScript(rmgutil.IssueThread)
 	issueTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: issuePkScript,
@@ -490,7 +490,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 		tx           wire.MsgTx
 		lastKeyID    btcec.KeyID
 		adminKeySets map[btcec.KeySetType]btcec.PublicKeySet
-		wspKeyIdMap  btcec.KeyIdMap
+		aspKeyIdMap  btcec.KeyIdMap
 		isValid      bool
 		code         blockchain.ErrorCode
 	}{
@@ -502,7 +502,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 				TxOut:    []*wire.TxOut{&provaTxOut},
 				LockTime: 0,
 			},
-			wspKeyIdMap: func() btcec.KeyIdMap {
+			aspKeyIdMap: func() btcec.KeyIdMap {
 				keyId1 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 				keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 				return map[btcec.KeyID]*btcec.PublicKey{keyId1: pubKey, keyId2: pubKey}
@@ -517,7 +517,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 				TxOut:    []*wire.TxOut{&provaTxOut},
 				LockTime: 0,
 			},
-			wspKeyIdMap: func() btcec.KeyIdMap {
+			aspKeyIdMap: func() btcec.KeyIdMap {
 				keyId1 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 				return map[btcec.KeyID]*btcec.PublicKey{keyId1: pubKey}
 			}(),
@@ -661,7 +661,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 				TxOut:    []*wire.TxOut{&rootTxOut, &adminOpAspTxOut},
 				LockTime: 0,
 			},
-			wspKeyIdMap: func() btcec.KeyIdMap {
+			aspKeyIdMap: func() btcec.KeyIdMap {
 				keyId1 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 				pubKey1, _ := btcec.ParsePubKey(hexToBytes("025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1"), btcec.S256())
 				return map[btcec.KeyID]*btcec.PublicKey{keyId1: pubKey1}
@@ -688,7 +688,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 				TxOut:    []*wire.TxOut{&issueTxOut, &provaTxOut},
 				LockTime: 0,
 			},
-			wspKeyIdMap: func() btcec.KeyIdMap {
+			aspKeyIdMap: func() btcec.KeyIdMap {
 				keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 				return map[btcec.KeyID]*btcec.PublicKey{keyId2: pubKey}
 			}(),
@@ -701,7 +701,7 @@ func TestCheckTransactionOutputs(t *testing.T) {
 		keyView := blockchain.NewKeyViewpoint()
 		keyView.SetKeys(test.adminKeySets)
 		keyView.SetLastKeyID(test.lastKeyID)
-		keyView.SetKeyIDs(test.wspKeyIdMap)
+		keyView.SetKeyIDs(test.aspKeyIdMap)
 		err := blockchain.CheckTransactionOutputs(rmgutil.NewTx(&test.tx), keyView)
 		if err == nil && test.isValid {
 			// Test passes since function returned valid for a
@@ -752,7 +752,7 @@ func TestCheckTransactionInputs(t *testing.T) {
 	// Create prova px script
 	keyId1 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 	keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
-	payAddr, _ := rmgutil.NewAddressAztec(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
+	payAddr, _ := rmgutil.NewAddressProva(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
 	provaPkScript, _ := txscript.PayToAddrScript(payAddr)
 	// spend prevTx
 	dummyPrevOut1 := wire.OutPoint{Hash: *prevTx.Hash(), Index: 0}
@@ -763,7 +763,7 @@ func TestCheckTransactionInputs(t *testing.T) {
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
 	// create issue tip tx
-	issuePkScript, _ := txscript.AztecThreadScript(rmgutil.IssueThread)
+	issuePkScript, _ := txscript.ProvaThreadScript(rmgutil.IssueThread)
 	issueTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: issuePkScript,

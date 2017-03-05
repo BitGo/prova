@@ -34,7 +34,7 @@ func RawTxInSignature(tx *wire.MsgTx, idx int, subScript []byte,
 
 // RawTxInSignatureNew returns the serialized ECDSA signature for the input idx of
 // the given transaction, with hashType appended to it.
-// TODO(aztec): need to cleanup the old/new versions
+// TODO(prova): need to cleanup the old/new versions
 func RawTxInSignatureNew(tx *wire.MsgTx, idx int, txSigHashes *TxSigHashes, amt int64, subScript []byte,
 	hashType SigHashType, key *btcec.PrivateKey) ([]byte, error) {
 
@@ -164,7 +164,7 @@ func sign(chainParams *chaincfg.Params, tx *wire.MsgTx, idx int, inputAmt int64,
 
 	// Create a new HashCache adding the intermediate sigHashes of this tx to it.
 	// The size of the HashCache is chosen big enough for any transaction.
-	// TODO(aztec) find a better way to set size of HashCache
+	// TODO(prova) find a better way to set size of HashCache
 	hashCache := NewHashCache(90)
 	hashCache.AddSigHashes(tx)
 	txHash := tx.TxHash()
@@ -213,7 +213,7 @@ func sign(chainParams *chaincfg.Params, tx *wire.MsgTx, idx int, inputAmt int64,
 		script, _ := signMultiSig(tx, idx, subScript, hashType,
 			addresses, nrequired, kdb)
 		return script, class, addresses, nrequired, nil
-	case AztecTy:
+	case ProvaTy:
 		// We use the keysDb lookup to get a list of privKeys
 		// that are needed for signing.
 		keys, err := kdb.GetKey(addresses[0])
@@ -224,14 +224,13 @@ func sign(chainParams *chaincfg.Params, tx *wire.MsgTx, idx int, inputAmt int64,
 		script, _ := signSafeMultiSig(tx, idx, txSigHashes, inputAmt, subScript, hashType,
 			keys, nrequired, kdb)
 		return script, class, addresses, nrequired, nil
-	case AztecAdminTy:
+	case ProvaAdminTy:
 		// We use the keysDb lookup to get a list of privKeys that are needed
 		// for signing. Passing nil will give us all keys.
 		keys, err := kdb.GetKey(nil)
 		if err != nil {
 			return nil, class, nil, 0, err
 		}
-		sort.Sort(ByPubKey{keys})
 		// do the signing
 		script, _ := signSafeMultiSig(tx, idx, txSigHashes, inputAmt, subScript, hashType,
 			keys, nrequired, kdb)
@@ -297,11 +296,11 @@ func mergeScripts(chainParams *chaincfg.Params, tx *wire.MsgTx, idx int,
 	case MultiSigTy:
 		return mergeMultiSig(tx, idx, addresses, nRequired, pkScript,
 			sigScript, prevScript)
-	case AztecTy:
-		return mergeAztecSig(tx, idx, addresses, nRequired, pkScript,
+	case ProvaTy:
+		return mergeProvaSig(tx, idx, addresses, nRequired, pkScript,
 			sigScript, prevScript)
-	case AztecAdminTy:
-		return mergeAztecAdminSig(tx, idx, addresses, nRequired, pkScript,
+	case ProvaAdminTy:
+		return mergeProvaAdminSig(tx, idx, addresses, nRequired, pkScript,
 			sigScript, prevScript)
 
 	// It doesn't actually make sense to merge anything other than multiig
@@ -433,16 +432,16 @@ sigLoop:
 	return script
 }
 
-// mergeAztecSig combines the two signature scripts sigScript and prevScript
+// mergeProvaSig combines the two signature scripts sigScript and prevScript
 // that both provide signatures for pkScript in output idx of tx.
-func mergeAztecSig(tx *wire.MsgTx, idx int, addresses []rmgutil.Address,
+func mergeProvaSig(tx *wire.MsgTx, idx int, addresses []rmgutil.Address,
 	nRequired int, pkScript, sigScript, prevScript []byte) []byte {
 	return append(prevScript[:], sigScript[:]...)
 }
 
-// mergeAztecAdminSig combines the two signature scripts sigScript and prevScript
+// mergeProvaAdminSig combines the two signature scripts sigScript and prevScript
 // that both provide signatures for pkScript in output idx of tx.
-func mergeAztecAdminSig(tx *wire.MsgTx, idx int, addresses []rmgutil.Address,
+func mergeProvaAdminSig(tx *wire.MsgTx, idx int, addresses []rmgutil.Address,
 	nRequired int, pkScript, sigScript, prevScript []byte) []byte {
 
 	sigPops, err := ParseScript(sigScript)

@@ -176,11 +176,11 @@ func checkInputsStandard(tx *rmgutil.Tx, utxoView *blockchain.UtxoViewpoint) err
 		entry := utxoView.LookupEntry(&prevOut.Hash)
 		originPkScript := entry.PkScriptByIndex(prevOut.Index)
 		switch txscript.GetScriptClass(originPkScript) {
-		case txscript.AztecTy:
+		case txscript.ProvaTy:
 			fallthrough
-		case txscript.GeneralAztecTy:
+		case txscript.GeneralProvaTy:
 			break
-		case txscript.AztecAdminTy:
+		case txscript.ProvaAdminTy:
 			sigPops, err := txscript.ParseScript(txIn.SignatureScript)
 			if err != nil {
 				str := fmt.Sprintf("transaction input #%d has "+
@@ -242,11 +242,11 @@ func checkInputsStandard(tx *rmgutil.Tx, utxoView *blockchain.UtxoViewpoint) err
 // A standard public key script is one that is a recognized form.
 func checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) error {
 	switch scriptClass {
-	case txscript.AztecTy:
+	case txscript.ProvaTy:
 		fallthrough
-	case txscript.GeneralAztecTy:
+	case txscript.GeneralProvaTy:
 		break
-	case txscript.AztecAdminTy:
+	case txscript.ProvaAdminTy:
 		// TODO(prova): apply validation rules here
 		break
 	case txscript.NonStandardTy:
@@ -409,7 +409,7 @@ func checkTransactionStandard(tx *rmgutil.Tx, height uint32, timeSource blockcha
 		}
 
 		// Only first output can be admin output
-		if scriptClass == txscript.AztecAdminTy {
+		if scriptClass == txscript.ProvaAdminTy {
 			if txInIndex != 0 {
 				str := fmt.Sprintf("transaction output %d: admin output "+
 					"only allowed at position 0.", txInIndex)
@@ -481,7 +481,7 @@ func checkTransactionStandard(tx *rmgutil.Tx, height uint32, timeSource blockcha
 
 		if threadId == rmgutil.IssueThread {
 			// TODO(prova): take care of issue thread
-			// If issuance/destruction tx, any non-nulldata outputs must be valid Aztec scripts
+			// If issuance/destruction tx, any non-nulldata outputs must be valid Prova scripts
 		}
 	}
 

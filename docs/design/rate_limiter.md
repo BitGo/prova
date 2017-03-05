@@ -1,20 +1,20 @@
-# RMG Validator Share Limiter
+# Prova Validate Key Share Limiter
 
-With RMG we need a way to guarantee against a situation in which a certain validator ever has a larger than acceptable share of hash power. We want a diverse set of miners so that no one validator is ever in a position where they can possibly exert unwanted control over the system or capture all of the transaction fees.
+With Prova we need a way to guarantee against a situation in which a certain validate key ever has a larger than acceptable share of blocks. We want a diverse set of validate keys to be used so that no one key is ever in a position where they can possibly exert excessive influence over the system or capture all of the transaction fees.
 
 ## Requirements
 
-Each block will be signed with a key that has a chain of signing authority that leads back to the genesis block.
+Each block is signed with a key that has a chain of signing authority that leads back to the genesis block.
 
-1. The network should be participatory with regard to validator. The ongoing chain should always composed of a diverse set of independent contributors.
-2. Should a validator's key ever be used in an aggressive way towards the network, the validator's key may be revoked through administrative action. This administrative transaction should not be able to be blocked by the validator himself.
-3. We want to avoid a hardware arms race among validators.
+1. The network should be participatory with regard to validate key. The ongoing chain should always be composed of a diverse set of independent contributors.
+2. Should a validate key ever be used in an aggressive way towards the network, the validate key may be revoked through administrative action. This administrative transaction should not be able to be blocked by the offending validate key.
+3. We want to avoid a hardware arms race among validate key holders.
 
-## Algorithm Options
+## Evaluated Algorithm Options
 
 ## Deterministic Block Numbers
 
-Each Validator Key that is allowed to generate blocks can only make blocks at certain deterministic block numbers. Block allowances cover distributed intervals, like every n blocks.
+Each validate key that is allowed to generate blocks can only make blocks at certain deterministic block numbers. Block allowances cover distributed intervals, like every n blocks.
 
 Assuming a block time of ten minutes, and block generators Alice and Bob, Alice can only mine even blocks and Bob can only create odd blocks.
 
@@ -48,7 +48,7 @@ Instead of deterministic blocks, miners could be given deterministic time window
 Pros:
 
 - A time round-robin may closely model the desired behavior of every miner getting a turn at bat.
-- It should be simple to fairly stateless-ly evaluate whether hashing should proceed and whether a block is valid
+- It should be simple to fairly evaluate in a stateless manner whether hashing should proceed and whether a block is valid
 
 Cons:
 
@@ -57,7 +57,7 @@ Cons:
 
 ## Individualized Difficulty
 
-Each validator key or deterministic grouping of validator keys could have an individualized difficulty rating. Every validaotr then has an equal chance at a block regardless of their hash power.
+Each validate key or deterministic grouping of validate keys could have an individualized difficulty rating. Every validate key then has an equal chance at a block regardless of their hash power.
 
 Pros:
 
@@ -84,14 +84,14 @@ Instead of orienting difficulty around a novel Hashcash proof of energy algorith
 
 This would work by having every generator provably burn or pay Bitcoin to a known output, in order to proxy as the non-reversible cost of an internal hash power function. Nodes would then verify that each block represented a certain well known cost to the generator and resolve the longest chain by the chain with the most Bitcoin spent. This would just serve as an independent safety check: an attacker bypassing somehow the other security features and reorganizing the chain would have to pay a cumulative cost in Bitcoin to do so.
 
-## Recommendation
+## Algorithm Selection
 
-The most simple and effective algorithm would be a straightforward addition of two consensus rules: one for total blocks and another for block runs.
+The simplest and most effective algorithm is a straightforward addition of two consensus rules: one for total blocks and another for block runs.
 
 The total blocks limit determines the permissible share of a mining difficulty period. A good value for this would be something like 25%: that would prevent someone from owning the end of one period and the beginning of another period to try and get a reorganizing majority of blocks.
 
 The block run limit determines the permissible share of consecutive blocks, to prevent a short lucky run or someone with outsized hash power distorting the expected spread of blocks.
 
-Still, this algorithm is vulnerable to an optimizing miner. Proof of work is supposed to represent proof of energy, meaning an expenditure of real world value. Optimization in hardware and software threaten to make that proof minimally meaningful in a non-market environment. However, in the near to medium term, we don't expect problems here, as the set of validators will be hand-selected, and since there is little direct financial incentive to dramatically increase hash power (given no block rewards and minimal transaction fees.)
+Still, this algorithm is vulnerable to an optimizing miner. Proof of work is supposed to represent proof of energy, meaning an expenditure of real world value. Optimization in hardware and software threaten to make that proof minimally meaningful in a non-market environment. However, in the near to medium term, we don't expect problems here, as the set of validate keys will be hand-selected, and since there is little direct financial incentive to dramatically increase hash power (given no block rewards and minimal transaction fees.)
 
-For a longer term algorithm, adopting a multi-stage round-robin block generation assignment protocol with aggregation of validation votes would be more efficient and meaningful. A middle step that would more closely approximate the simple guarantees of the Bitcoin Blockchain would be to use proof-of-burn through an integration with the Bitcoin Blockchain.
+For a longer term algorithm, adopting a multi-stage round-robin block generation assignment protocol with aggregation of validate key votes would be more efficient and meaningful. A middle step that would more closely approximate the simple guarantees of the Bitcoin Blockchain would be to use proof-of-burn through an integration with the Bitcoin Blockchain.

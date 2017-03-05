@@ -215,7 +215,7 @@ type BlockChain struct {
 	// keySets manage permission to modify the chain state.
 	adminKeySets map[btcec.KeySetType]btcec.PublicKeySet
 	// a mapping of all keyIDs and related ASP public keys.
-	wspKeyIdMap btcec.KeyIdMap
+	aspKeyIdMap btcec.KeyIdMap
 
 	// These fields are related to handling of orphan blocks.  They are
 	// protected by a combination of the chain lock and the orphan lock.
@@ -890,7 +890,7 @@ func (b *BlockChain) connectBlock(node *blockNode, block *rmgutil.Block, utxoVie
 	b.totalSupply = keyView.TotalSupply()
 	b.lastKeyID = keyView.LastKeyID()
 	b.adminKeySets = keyView.Keys()
-	b.wspKeyIdMap = keyView.KeyIDs()
+	b.aspKeyIdMap = keyView.KeyIDs()
 	b.stateLock.Unlock()
 
 	// Update the state for the best block.  Notice how this replaces the
@@ -1097,7 +1097,7 @@ func (b *BlockChain) reorganizeChain(detachNodes, attachNodes *list.List, flags 
 	keyView.SetLastKeyID(b.lastKeyID)
 	keyView.SetTotalSupply(b.totalSupply)
 	keyView.SetKeys(b.adminKeySets)
-	keyView.SetKeyIDs(b.wspKeyIdMap)
+	keyView.SetKeyIDs(b.aspKeyIdMap)
 	for e := detachNodes.Front(); e != nil; e = e.Next() {
 		n := e.Value.(*blockNode)
 		var block *rmgutil.Block
@@ -1294,7 +1294,7 @@ func (b *BlockChain) connectBestChain(node *blockNode, block *rmgutil.Block, fla
 		keyView.SetLastKeyID(b.lastKeyID)
 		keyView.SetTotalSupply(b.totalSupply)
 		keyView.SetKeys(b.adminKeySets)
-		keyView.SetKeyIDs(b.wspKeyIdMap)
+		keyView.SetKeyIDs(b.aspKeyIdMap)
 		stxos := make([]spentTxOut, 0, countSpentOutputs(block))
 		if !fastAdd {
 			err := b.checkConnectBlock(node, block, utxoView, keyView, &stxos)
@@ -1510,9 +1510,9 @@ func (b *BlockChain) AdminKeySets() map[btcec.KeySetType]btcec.PublicKeySet {
 // This function is safe for concurrent access.
 func (b *BlockChain) KeyIDs() btcec.KeyIdMap {
 	b.stateLock.RLock()
-	wspKeyIdMap := b.wspKeyIdMap
+	aspKeyIdMap := b.aspKeyIdMap
 	b.stateLock.RUnlock()
-	return wspKeyIdMap
+	return aspKeyIdMap
 }
 
 // IndexManager provides a generic interface that the is called when blocks are
@@ -1629,7 +1629,7 @@ func New(config *Config) (*BlockChain, error) {
 		lastKeyID:           btcec.KeyID(0),
 		totalSupply:         uint64(0),
 		adminKeySets:        make(map[btcec.KeySetType]btcec.PublicKeySet),
-		wspKeyIdMap:         make(map[btcec.KeyID]*btcec.PublicKey),
+		aspKeyIdMap:         make(map[btcec.KeyID]*btcec.PublicKey),
 		index:               make(map[chainhash.Hash]*blockNode),
 		depNodes:            make(map[chainhash.Hash][]*blockNode),
 		orphans:             make(map[chainhash.Hash]*orphanBlock),

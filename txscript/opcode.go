@@ -303,8 +303,8 @@ const (
 	AdminOpProvisionKeyRevoke = 0x04 // 4
 	AdminOpValidateKeyAdd     = 0x11 // 17
 	AdminOpValidateKeyRevoke  = 0x12 // 18
-	AdminOpWSPKeyAdd          = 0x13 // 19
-	AdminOpWSPKeyRevoke       = 0x14 // 20
+	AdminOpASPKeyAdd          = 0x13 // 19
+	AdminOpASPKeyRevoke       = 0x14 // 20
 )
 
 // Conditional execution constants.
@@ -520,7 +520,7 @@ var opcodeArray = [256]opcode{
 	OP_NOP9:  {OP_NOP9, "OP_NOP9", 1, opcodeNop},
 	OP_NOP10: {OP_NOP10, "OP_NOP10", 1, opcodeNop},
 
-	// Aztec opcodes
+	// Prova opcodes
 	OP_CHECKSAFEMULTISIG: {OP_CHECKSAFEMULTISIG, "OP_CHECKSAFEMULTISIG", 1, opcodeCheckSafeMultiSig},
 	OP_CHECKTHREAD:       {OP_CHECKTHREAD, "OP_CHECKTHREAD", 1, opcodeCheckSafeMultiSig},
 
@@ -1999,12 +1999,15 @@ type parsedSigInfo struct {
 //
 // Note that keyids are a concept that must be handled entirely outside the scripting
 // engine, because they require reference to chain state. We handle translation of the
-// Aztec-conforming scripts into scripts that can be executed by the VM at a higher
+// Prova-conforming scripts into scripts that can be executed by the VM at a higher
 // layer. Scripts to be executed by this opcode handler MUST already have their
 // key-ids entirely translated into key-hashes.
 //
 // See the opcodeCheckSigVerify documentation for more details about the process
 // for verifying each signature.
+//
+// Note that, unlike in Bitcoin, pubkeys/sigs in the scriptSig do NOT need to be in the
+// same order as the key hashes in the scriptPub.
 //
 // Stack transformation:
 // [... [{sig, pubkey} ...] numsigs [keyid ...] numkeyids [pubkeyhash ...] numpubkeyhashes] -> [... bool]
@@ -2016,7 +2019,7 @@ func opcodeCheckSafeMultiSig(op *parsedOpcode, vm *Engine) error {
 	}
 	numKeyHashes := int(numKeys.Int32())
 	if numKeyHashes < 0 || numKeyHashes > MaxPubKeysPerMultiSig {
-		// TODO(aztec): different limit here
+		// TODO(prova): different limit here
 		return ErrStackTooManyPubKeys
 	}
 	vm.numOps += numKeyHashes
@@ -2067,12 +2070,12 @@ func opcodeCheckSafeMultiSig(op *parsedOpcode, vm *Engine) error {
 	}
 
 	// Get script starting from the most recent OP_CODESEPARATOR.
-	// TODO(aztec): Possibly remove
+	// TODO(prova): Possibly remove
 	script := vm.subScript()
 
 	// Remove any of the signatures since there is no way for a signature to
 	// sign itself.
-	// TODO(aztec): this will likely change -- need to figure out if we really need to include the script when signing
+	// TODO(prova): this will likely change -- need to figure out if we really need to include the script when signing
 	for _, sigInfo := range signatures {
 		script = removeOpcodeByData(script, sigInfo.signature)
 		script = removeOpcodeByData(script, sigInfo.pubKey)
@@ -2080,23 +2083,17 @@ func opcodeCheckSafeMultiSig(op *parsedOpcode, vm *Engine) error {
 
 	success := true
 	// Initially increment, since we decrement immediately at the top of loop
-	numKeyHashes++
 	pubKeyHashIdx := -1
 	signatureIdx := 0
+	matchedKeyHashes := make(map[int]bool)
 	for numSignatures > 0 {
 		// When there are more signatures than public key remaining,
 		// there is no way to succeed since too many signatures are
 		// invalid, so exit early.
 		pubKeyHashIdx++
-		numKeyHashes--
-		if numSignatures > numKeyHashes {
-			success = false
-			break
-		}
 
 		sigInfo := signatures[signatureIdx]
 		pubKey := sigInfo.pubKey
-		pubKeyHash := keyHashes[pubKeyHashIdx]
 
 		// The order of the signature and public key evaluation is
 		// important here since it can be distinguished by an
@@ -2108,11 +2105,26 @@ func opcodeCheckSafeMultiSig(op *parsedOpcode, vm *Engine) error {
 			continue
 		}
 
-		// If pubkey for this sig doesn't match the current hash, move on
 		hash256 := fastsha256.Sum256(pubKey)
 		hash160 := calcHash(hash256[:], ripemd160.New())
-		if !bytes.Equal(hash160, pubKeyHash) {
-			continue
+
+		// Check hash of key in scriptSig against all key hashes in scriptPub
+		// If we don't find one that matches, script fails.
+		found := false
+		for idx, keyHash := range keyHashes {
+			if matchedKeyHashes[idx] {
+				// Make sure we don't re-match the same key
+				continue
+			}
+			if bytes.Equal(hash160, keyHash) {
+				found = true
+				matchedKeyHashes[idx] = true
+				break
+			}
+		}
+		if !found {
+			success = false
+			break
 		}
 
 		// Split the signature into hash type and signature components.

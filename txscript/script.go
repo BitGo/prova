@@ -7,6 +7,7 @@ package txscript
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"github.com/bitgo/rmgd/btcec"
 	"github.com/bitgo/rmgd/chaincfg/chainhash"
@@ -248,8 +249,8 @@ func asInt32(pop parsedOpcode) (int32, error) {
 	return result.Int32(), err
 }
 
-// ExtractKeyIDs takes an Aztec pkScript and extracts the keyIDs from it.
-// We assume a Aztec address structure like this:
+// ExtractKeyIDs takes an Prova pkScript and extracts the keyIDs from it.
+// We assume a Prova address structure like this:
 // basic: <2 hash keyID1 keyID2 3 OP_CHECKSAFEMULTISIG>
 // general: <x hash/keyID hash/keyID y OP_CHECKSAFEMULTISIG>
 func ExtractKeyIDs(pkScript []parsedOpcode) ([]btcec.KeyID, error) {
@@ -275,7 +276,7 @@ func ExtractKeyIDs(pkScript []parsedOpcode) ([]btcec.KeyID, error) {
 }
 
 // ReplaceKeyIds replaces keyIds in a pkScript with pubKeyHashes.
-// We assume a Aztec address structure like this:
+// We assume a Prova address structure like this:
 // basic: <2 hash keyID1 keyID2 3 OP_CHECKSAFEMULTISIG>
 // general: <x hash/keyID hash/keyID y OP_CHECKSAFEMULTISIG>
 func ReplaceKeyIDs(pkScript []parsedOpcode, keyIdMap map[btcec.KeyID][]byte) error {
@@ -308,8 +309,8 @@ func ReplaceKeyIDs(pkScript []parsedOpcode, keyIdMap map[btcec.KeyID][]byte) err
 	return nil
 }
 
-// ExtractThreadID takes an Aztec admin pkScript and extracts the threadID from it.
-// We assume an Aztec admin pkScript structure like this:
+// ExtractThreadID takes an Prova admin pkScript and extracts the threadID from it.
+// We assume an Prova admin pkScript structure like this:
 // <threadID> OP_CHECKTHREAD
 func ExtractThreadID(pkScript []parsedOpcode) (rmgutil.ThreadID, error) {
 	if len(pkScript) != 2 || !isSmallInt(pkScript[0].opcode) {
@@ -348,12 +349,12 @@ func ExtractAdminData(pkScript []parsedOpcode) (byte, *btcec.PublicKey, error) {
 	return pkScript[1].data[0], pubKey, nil
 }
 
-// ExtractWspData can read AdminOpWSPKeyAdd and AdminOpWSPKeyRevoke from admin outputs.
+// ExtractASPData can read AdminOpASPKeyAdd and AdminOpASPKeyRevoke from admin outputs.
 // An admin op script of structure <OP_RETURN><OP_DATA> can be assumed from
 // previous validation.
 // This function returns the admin operation type byte, the parsed keyID, and
 // the parsed public key.
-func ExtractWspData(pkScript []parsedOpcode) (byte, *btcec.PublicKey, btcec.KeyID, error) {
+func ExtractASPData(pkScript []parsedOpcode) (byte, *btcec.PublicKey, btcec.KeyID, error) {
 	pubKey, err := btcec.ParsePubKey(pkScript[1].data[1:1+btcec.PubKeyBytesLenCompressed], btcec.S256())
 	if err != nil {
 		return 0, nil, 0, err
@@ -394,14 +395,36 @@ func ExtractAdminOpData(pkScript []parsedOpcode) (bool, btcec.KeySetType, *btcec
 	case AdminOpValidateKeyRevoke:
 		isAddOp = false
 		keySetType = btcec.ValidateKeySet
-	case AdminOpWSPKeyAdd:
+	case AdminOpASPKeyAdd:
 		isAddOp = true
-		keySetType = btcec.WspKeySet
-	case AdminOpWSPKeyRevoke:
+		keySetType = btcec.ASPKeySet
+	case AdminOpASPKeyRevoke:
 		isAddOp = false
-		keySetType = btcec.WspKeySet
+		keySetType = btcec.ASPKeySet
 	}
 	return isAddOp, keySetType, pubKey, keyID
+}
+
+// AdminOpString gives a human-readable version of an admin op script.
+// The function assumes previous validation as an actual valid admin op script.
+func AdminOpString(buf []byte) string {
+	opcodes, err := ParseScript(buf)
+	if err != nil {
+		return ""
+	}
+	isAddOp, keySetType, pubKey, keyID := ExtractAdminOpData(opcodes)
+	op := "REVOKE_KEY"
+	if isAddOp {
+		op = "ADD_KEY"
+	}
+	result := fmt.Sprintf("%s %s %s",
+		op,
+		keySetType.String(),
+		hex.EncodeToString(pubKey.SerializeCompressed()))
+	if keyID > 0 {
+		result = fmt.Sprintf("%s %d", result, uint32(keyID))
+	}
+	return result
 }
 
 // canonicalPush returns true if the object is either not a push instruction
@@ -446,7 +469,7 @@ func removeOpcodeByData(pkscript []parsedOpcode, data []byte) []parsedOpcode {
 // calcSignatureHash will, given a script and hash type for the current script
 // engine instance, calculate the signature hash to be used for signing and
 // verification.
-// TODO(aztec): Redefine this completely to eliminate malleability (segwit)
+// TODO(prova): Redefine this completely to eliminate malleability (segwit)
 func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, idx int) []byte {
 	// The SigHashSingle signature type signs only the corresponding input
 	// and output (the output with the same index number as the input).
@@ -705,7 +728,7 @@ func getSigOpCount(pops []parsedOpcode, precise bool) int {
 				nSigs += MaxPubKeysPerMultiSig
 			}
 		case OP_CHECKSAFEMULTISIG:
-			// TODO(aztec): implement
+			// TODO(prova): implement
 			fallthrough
 		default:
 			// Not a sigop.

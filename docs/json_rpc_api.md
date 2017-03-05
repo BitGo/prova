@@ -28,20 +28,18 @@
 <a name="Overview" />
 ### 1. Overview
 
-btcd provides a [JSON-RPC](http://json-rpc.org/wiki/specification) API that is
-fully compatible with the original bitcoind/bitcoin-qt.  There are a few key
-differences between btcd and bitcoind as far as how RPCs are serviced:
+Prova provides a [JSON-RPC](http://json-rpc.org/wiki/specification) API that is
+fully compatible with the original btcd and bitcoind/bitcoin-qt.  There are a few key differences between Prova and bitcoind as far as how RPCs are serviced:
 * Unlike bitcoind that has the wallet and chain intermingled in the same process
   which leads to several issues, btcd intentionally splits the wallet and chain
   services into independent processes.  See the blog post
   [here](https://blog.conformal.com/btcd-not-your-moms-bitcoin-daemon/) for
   further details on why they were separated.  This means that if you are
-  talking directly to btcd, only chain-related RPCs are available.  However both
-  chain-related and wallet-related RPCs are available via
+  talking directly to Prova, only chain-related RPCs are available.  However both chain-related and wallet-related RPCs are available via
   [btcwallet](https://github.com/btcsuite/btcwallet).
-* btcd is secure by default which means that the RPC connection is TLS-enabled
+* Prova is secure by default which means that the RPC connection is TLS-enabled
   by default
-* btcd provides access to the API through both
+* Prova provides access to the API through both
   [HTTP POST](http://en.wikipedia.org/wiki/POST_%28HTTP%29) requests and
   [Websockets](http://en.wikipedia.org/wiki/WebSocket)
 
@@ -580,7 +578,7 @@ The following is an overview of the RPC methods which are implemented by Prova, 
 |#|Method|Safe for limited user?|Description|
 |---|------|----------|-----------|
 |1|[getadmininfo](#getadmininfo)|Y|Get info about the current admin state.|
-
+|2|[setvalidatekeys](#setvalidatekeys)|Y|Set the validate private keys.|
 
 <a name="ProvaMethodDetails" />
 **6.2 Method Details**<br />
@@ -592,8 +590,21 @@ The following is an overview of the RPC methods which are implemented by Prova, 
 |Method|getadmininfo|
 |Parameters|None|
 |Description|Get the latest admin state: unspent admin transaction outputs, net issuance, and admin keys.|
-|Returns|`{ (json object)`<br />&nbsp;`"hash": "data",  (string) the hex-encoded bytes of the best block hash`<br />&nbsp;`"height": n (numeric) the block height of the best block`<br />&nbsp;`"threadtips": { (json object) `<br />&nbsp;&nbsp;`"issue":  "data", (string) the transaction id of the unspent issue thread utxo`<br />&nbsp;&nbsp;`"provision":  "data", (string) the transaction id of the unspent provision thread utxo`<br />&nbsp;&nbsp;`"root":  "data", (string) the transaction id of the unspent root thread utxo`<br />&nbsp;`} `<br />&nbsp;`"totalsupply": n (numeric) the net value of admin issuance`<br />&nbsp;`"lastkeyid": n (numeric) the highest key id value ever provisioned`<br />&nbsp;`"rootkeys": (array of strings) the root pubKeys`<br />&nbsp;`"provisionkeys": (array of strings) the provision pubKeys`<br />&nbsp;`"issuekeys": (array of strings) the issue pubKeys`<br />&nbsp;`"validatekeys": (array of strings) the validate pubKeys`<br />&nbsp;`"wspkeys": { (json object) `<br />&nbsp;&nbsp;`"$keyId":  "data", (string) the wsp pubKey`<br />&nbsp;`} `<br />`}`|
+|Returns|`{ (json object)`<br />&nbsp;`"hash": "data",  (string) the hex-encoded bytes of the best block hash`<br />&nbsp;`"height": n (numeric) the block height of the best block`<br />&nbsp;`"threadtips": [{ (array of json objects)`<br />&nbsp;&nbsp;`"id": n (numeric) the thread id`<br />&nbsp;&nbsp;`"name":  "data", (string) the thread name`<br />&nbsp;&nbsp;`"outpoint":  "txid:vout", (string) the unspent outpoint`<br />&nbsp;`}] `<br />&nbsp;`"totalsupply": n (numeric) the net value of admin issuance`<br />&nbsp;`"lastkeyid": n (numeric) the highest key id value ever provisioned`<br />&nbsp;`"rootkeys": (array of strings) the root pubKeys`<br />&nbsp;`"provisionkeys": (array of strings) the provision pubKeys`<br />&nbsp;`"issuekeys": (array of strings) the issue pubKeys`<br />&nbsp;`"validatekeys": (array of strings) the validate pubKeys`<br />&nbsp;`"aspkeys": [{ (array of json objects) `<br />&nbsp;&nbsp;`"pubkey":  "data", (string) the asp pubKey`<br />&nbsp;&nbsp;`"keyid":  n, (numeric) the ASP key id`<br />&nbsp;`}] `<br />`}`
 [Return to Overview](#ExtMethodOverview)<br />
+
+***
+
+<a name="setvalidatekeys"></a>
+
+|   |   |
+|---|---|
+|Method|setvalidatekeys|
+|Parameters|1. validateprivkeys (array of strings, required) - The private keys to use as validate keys |
+|Description|Set the private keys to use as signing validate keys when generating new blocks.|
+|Note|Setvalidatekeys is not intended to be used in conjunction with the validate keys environment variable.|
+|Returns|Nothing|
+[Return to Overview](#MethodOverview)<br />
 
 <a name="ExtensionMethods" />
 ### 6. Extension Methods

@@ -16,7 +16,7 @@ import (
 // TestCheckBlockScripts ensures that validating the all of the scripts in a
 // known-good block doesn't return an error.
 //func TestCheckBlockScripts(t *testing.T) {
-//TODO(aztec) fix test
+//TODO(prova) fix test
 func CheckBlockScripts(t *testing.T) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 

@@ -156,7 +156,7 @@ func CalcWork(bits uint32) *big.Int {
 // can have given starting difficulty bits and a duration.  It is mainly used to
 // verify that claimed proof of work by a block is sane as compared to a
 // known good checkpoint.
-// TODO(Aztec): re-add with adjusted logic for the new difficulty calulation.
+// TODO(Prova): re-add with adjusted logic for the new difficulty calulation.
 func (b *BlockChain) calcEasiestDifficulty(bits uint32, duration time.Duration) uint32 {
 	return b.chainParams.PowLimitBits
 }

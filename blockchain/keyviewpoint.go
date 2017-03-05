@@ -10,7 +10,6 @@ import (
 	"github.com/bitgo/rmgd/rmgutil"
 	"github.com/bitgo/rmgd/txscript"
 	"github.com/bitgo/rmgd/wire"
-	"sort"
 )
 
 // KeyViewpoint represents a view into the set of admin keys from a specific
@@ -21,7 +20,7 @@ type KeyViewpoint struct {
 	lastKeyID    btcec.KeyID
 	totalSupply  uint64
 	adminKeySets map[btcec.KeySetType]btcec.PublicKeySet
-	wspKeyIdMap  btcec.KeyIdMap
+	aspKeyIdMap  btcec.KeyIdMap
 }
 
 // ThreadTips returns
@@ -29,28 +28,30 @@ func (view *KeyViewpoint) ThreadTips() map[rmgutil.ThreadID]*wire.OutPoint {
 	return view.threadTips
 }
 
-// SetThreadTips sets
+// SetThreadTips sets the tips of the admin threads.
+// The passed reference is deep copied, so modification does not affect
+// source data structures.
 func (view *KeyViewpoint) SetThreadTips(
 	threadTips map[rmgutil.ThreadID]*wire.OutPoint) {
-	view.threadTips = threadTips
+	view.threadTips = rmgutil.CopyThreadTips(threadTips)
 }
 
-// LastKeyID returns
+// LastKeyID
 func (view *KeyViewpoint) LastKeyID() btcec.KeyID {
 	return view.lastKeyID
 }
 
-// SetLastKeyID sets
+// SetLastKeyID
 func (view *KeyViewpoint) SetLastKeyID(lastKeyID btcec.KeyID) {
 	view.lastKeyID = lastKeyID
 }
 
-// TotalSupply returns
+// TotalSupply
 func (view *KeyViewpoint) TotalSupply() uint64 {
 	return view.totalSupply
 }
 
-// SetTotalSupply sets
+// SetTotalSupply
 func (view *KeyViewpoint) SetTotalSupply(totalSupply uint64) {
 	view.totalSupply = totalSupply
 }
@@ -76,7 +77,6 @@ func (view *KeyViewpoint) GetAdminKeyHashes(threadID rmgutil.ThreadID) ([][]byte
 	}
 
 	pubs := view.adminKeySets[btcec.KeySetType(threadID)]
-	sort.Sort(ByPubKey{PublicKeys(pubs)})
 	hashes := make([][]byte, len(pubs))
 	for i, pubKey := range pubs {
 		hashes[i] = rmgutil.Hash160(pubKey.SerializeCompressed())
@@ -84,24 +84,24 @@ func (view *KeyViewpoint) GetAdminKeyHashes(threadID rmgutil.ThreadID) ([][]byte
 	return hashes, nil
 }
 
-// SetKeyIDs sets the mapping of keyIDs to WSP keys.
-func (view *KeyViewpoint) SetKeyIDs(wspKeyIdMap btcec.KeyIdMap) {
-	if wspKeyIdMap != nil {
-		view.wspKeyIdMap = wspKeyIdMap
+// SetKeyIDs sets the mapping of keyIDs to ASP keys.
+func (view *KeyViewpoint) SetKeyIDs(aspKeyIdMap btcec.KeyIdMap) {
+	if aspKeyIdMap != nil {
+		view.aspKeyIdMap = aspKeyIdMap.DeepCopy()
 	}
 }
 
-// KeyIDs returns a mapping of keyIDs to WSP keys at the position in the chain
+// KeyIDs returns a mapping of keyIDs to ASP keys at the position in the chain
 // the view currently represents.
 func (view *KeyViewpoint) KeyIDs() btcec.KeyIdMap {
-	return view.wspKeyIdMap
+	return view.aspKeyIdMap
 }
 
 // LookupKeyIDs returns pubKeyHashes for all registered KeyIDs
 func (view *KeyViewpoint) LookupKeyIDs(keyIDs []btcec.KeyID) map[btcec.KeyID][]byte {
 	keyIdMap := make(map[btcec.KeyID][]byte)
 	for _, keyID := range keyIDs {
-		pubKey := view.wspKeyIdMap[keyID]
+		pubKey := view.aspKeyIdMap[keyID]
 		if pubKey != nil {
 			keyIdMap[keyID] = rmgutil.Hash160(pubKey.SerializeCompressed())
 		}
@@ -157,12 +157,12 @@ func (view *KeyViewpoint) ProcessAdminOuts(tx *rmgutil.Tx, blockHeight uint32) {
 // applyAdminOp takes a single admin opp and applies it to the view.
 func (view *KeyViewpoint) applyAdminOp(isAddOp bool,
 	keySetType btcec.KeySetType, pubKey *btcec.PublicKey, keyID btcec.KeyID) {
-	if keySetType == btcec.WspKeySet {
+	if keySetType == btcec.ASPKeySet {
 		if isAddOp {
-			view.wspKeyIdMap[keyID] = pubKey
+			view.aspKeyIdMap[keyID] = pubKey
 			view.lastKeyID = keyID
 		} else {
-			delete(view.wspKeyIdMap, keyID)
+			delete(view.aspKeyIdMap, keyID)
 		}
 	} else {
 		if isAddOp {
@@ -172,36 +172,6 @@ func (view *KeyViewpoint) applyAdminOp(isAddOp bool,
 			view.adminKeySets[keySetType] = view.adminKeySets[keySetType].Remove(pos)
 		}
 	}
-}
-
-// PublicKeys is a wrapper for the btcec.PublicKey array to allow sorting.
-type PublicKeys []btcec.PublicKey
-
-// Len to implement the sort interface.
-func (pubs PublicKeys) Len() int {
-	return len(pubs)
-}
-
-// Swap to implement the sort interface.
-func (pubs PublicKeys) Swap(i, j int) {
-	pubs[i], pubs[j] = pubs[j], pubs[i]
-}
-
-// ByPubKey implements sort.Interface by providing Less and using the Len and
-// Swap methods of the embedded PublicKeys value.
-type ByPubKey struct {
-	PublicKeys
-}
-
-// Less compares two private keys to determine order. The key are compared by
-// deriving the public keys, and comparing lexicographically.
-func (s ByPubKey) Less(i, j int) bool {
-	pubKeyI := &s.PublicKeys[i]
-	pubKeyStrI := fmt.Sprintf("%x", pubKeyI.SerializeCompressed())
-
-	pubKeyJ := &s.PublicKeys[j]
-	pubKeyStrJ := fmt.Sprintf("%x", pubKeyJ.SerializeCompressed())
-	return pubKeyStrI < pubKeyStrJ
 }
 
 // connectTransaction updates the view by processing all new admin operations in
@@ -263,7 +233,7 @@ func (view *KeyViewpoint) disconnectTransactions(block *rmgutil.Block) error {
 					isAddOp = !isAddOp
 					view.applyAdminOp(isAddOp, keySetType, pubKey, keyID)
 					// decrease lastKeyID counter, is an Add op is disconnected.
-					if keySetType == btcec.WspKeySet && isAddOp {
+					if keySetType == btcec.ASPKeySet && isAddOp {
 						view.lastKeyID = keyID - 1
 					}
 				}
@@ -284,6 +254,6 @@ func NewKeyViewpoint() *KeyViewpoint {
 		lastKeyID:    btcec.KeyID(0),
 		totalSupply:  uint64(0),
 		adminKeySets: make(map[btcec.KeySetType]btcec.PublicKeySet),
-		wspKeyIdMap:  make(map[btcec.KeyID]*btcec.PublicKey),
+		aspKeyIdMap:  make(map[btcec.KeyID]*btcec.PublicKey),
 	}
 }

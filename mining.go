@@ -66,7 +66,7 @@ func isAdmin(msgTx *wire.MsgTx) bool {
 			return false
 		}
 		scriptClass := txscript.TypeOfScript(pops)
-		if scriptClass == txscript.AztecAdminTy {
+		if scriptClass == txscript.ProvaAdminTy {
 			return true
 		}
 	}
@@ -470,6 +470,7 @@ func NewBlockTemplate(policy *mining.Policy, server *server, payToAddress rmguti
 	blockTxns = append(blockTxns, coinbaseTx)
 	blockUtxos := blockchain.NewUtxoViewpoint()
 	keyView := blockchain.NewKeyViewpoint()
+	keyView.SetLastKeyID(blockManager.chain.LastKeyID())
 	keyView.SetKeys(blockManager.chain.AdminKeySets())
 	keyView.SetKeyIDs(blockManager.chain.KeyIDs())
 
@@ -700,6 +701,16 @@ mempoolLoop:
 			logSkippedDeps(tx, deps)
 			continue
 		}
+
+		// CheckTransactionOutputs checks outputs for state violations.
+		err = blockchain.CheckTransactionOutputs(tx, keyView)
+		if err != nil {
+			minrLog.Tracef("Skipping tx %s due to error in "+
+				"CheckTransactionOutputs: %v", tx.Hash(), err)
+			logSkippedDeps(tx, deps)
+			continue
+		}
+
 		err = blockchain.ValidateTransactionScripts(tx, blockUtxos, keyView,
 			txscript.StandardVerifyFlags, server.sigCache, server.hashCache)
 		if err != nil {

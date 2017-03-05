@@ -295,7 +295,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	addrHash := [20]byte{0x01}
 	keyId1 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 	keyId2 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
-	addr, err := rmgutil.NewAddressAztec(addrHash[:],
+	addr, err := rmgutil.NewAddressProva(addrHash[:],
 		[]btcec.KeyID{keyId1, keyId2}, &chaincfg.TestNet3Params)
 	if err != nil {
 		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)
@@ -326,13 +326,13 @@ func TestCheckTransactionStandard(t *testing.T) {
 		PkScript: adminOpPkScript,
 	}
 	// create root tx out
-	rootPkScript, _ := txscript.AztecThreadScript(rmgutil.RootThread)
+	rootPkScript, _ := txscript.ProvaThreadScript(rmgutil.RootThread)
 	rootTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: rootPkScript,
 	}
 	// create provision tx out
-	provisionPkScript, _ := txscript.AztecThreadScript(rmgutil.ProvisionThread)
+	provisionPkScript, _ := txscript.ProvaThreadScript(rmgutil.ProvisionThread)
 	provisionTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: provisionPkScript,
@@ -652,7 +652,7 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 		PkScript: adminOpPkScript,
 	}
 	// create root tip tx
-	rootPkScript, _ := txscript.AztecThreadScript(rmgutil.RootThread)
+	rootPkScript, _ := txscript.ProvaThreadScript(rmgutil.RootThread)
 	rootTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: rootPkScript,
@@ -670,7 +670,7 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
 	// create provision tip tx
-	provisionPkScript, _ := txscript.AztecThreadScript(rmgutil.ProvisionThread)
+	provisionPkScript, _ := txscript.ProvaThreadScript(rmgutil.ProvisionThread)
 	provisionTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: provisionPkScript,
@@ -688,7 +688,7 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
 	// create issue tip tx
-	issuePkScript, _ := txscript.AztecThreadScript(rmgutil.IssueThread)
+	issuePkScript, _ := txscript.ProvaThreadScript(rmgutil.IssueThread)
 	issueTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
 		PkScript: issuePkScript,
@@ -705,24 +705,24 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 		SignatureScript:  testSigScript,
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
-	// Create aztec txout
+	// Create prova txout
 	keyId1 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 	keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
-	payAddr, _ := rmgutil.NewAddressAztec(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
-	aztecPkScript, _ := txscript.PayToAddrScript(payAddr)
-	aztecTxOut := wire.TxOut{
+	payAddr, _ := rmgutil.NewAddressProva(make([]byte, 20), []btcec.KeyID{keyId1, keyId2}, &chaincfg.RegressionNetParams)
+	provaPkScript, _ := txscript.PayToAddrScript(payAddr)
+	provaTxOut := wire.TxOut{
 		Value:    0, // 0 RMG
-		PkScript: aztecPkScript,
+		PkScript: provaPkScript,
 	}
-	aztecTx := rmgutil.NewTx(&wire.MsgTx{
+	provaTx := rmgutil.NewTx(&wire.MsgTx{
 		Version:  1,
 		TxIn:     []*wire.TxIn{&coinbaseTxIn},
-		TxOut:    []*wire.TxOut{&aztecTxOut},
+		TxOut:    []*wire.TxOut{&provaTxOut},
 		LockTime: 0,
 	})
-	aztecPrevOut := wire.OutPoint{Hash: *aztecTx.Hash(), Index: 0}
-	aztecTxIn := wire.TxIn{
-		PreviousOutPoint: aztecPrevOut,
+	provaPrevOut := wire.OutPoint{Hash: *provaTx.Hash(), Index: 0}
+	provaTxIn := wire.TxIn{
+		PreviousOutPoint: provaPrevOut,
 		SignatureScript:  testSigScript,
 		Sequence:         wire.MaxTxInSequenceNum,
 	}
@@ -731,7 +731,7 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 	utxoView.AddTxOuts(rootTipTx, 0)
 	utxoView.AddTxOuts(provisionTipTx, 0)
 	utxoView.AddTxOuts(issueTipTx, 0)
-	utxoView.AddTxOuts(aztecTx, 0)
+	utxoView.AddTxOuts(provaTx, 0)
 
 	tests := []struct {
 		name       string
@@ -775,10 +775,10 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 			isStandard: false,
 		},
 		{
-			name: "spend aztec output with admin thread",
+			name: "spend prova output with admin thread",
 			tx: wire.MsgTx{
 				Version:  1,
-				TxIn:     []*wire.TxIn{&aztecTxIn},
+				TxIn:     []*wire.TxIn{&provaTxIn},
 				TxOut:    []*wire.TxOut{&provisionTxOut},
 				LockTime: 0,
 			},
@@ -790,7 +790,7 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 			name: "spend with second input",
 			tx: wire.MsgTx{
 				Version:  1,
-				TxIn:     []*wire.TxIn{&aztecTxIn, &issueTxIn},
+				TxIn:     []*wire.TxIn{&provaTxIn, &issueTxIn},
 				TxOut:    []*wire.TxOut{&issueTxOut},
 				LockTime: 0,
 			},
@@ -799,11 +799,11 @@ func TestCheckAdminTransactionStandard(t *testing.T) {
 			isStandard: false,
 		},
 		{
-			name: "spend admin thread with aztec",
+			name: "spend admin thread with prova",
 			tx: wire.MsgTx{
 				Version:  1,
 				TxIn:     []*wire.TxIn{&issueTxIn},
-				TxOut:    []*wire.TxOut{&aztecTxOut},
+				TxOut:    []*wire.TxOut{&provaTxOut},
 				LockTime: 0,
 			},
 			height:     300000,

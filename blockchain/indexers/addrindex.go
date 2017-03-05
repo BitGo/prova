@@ -573,7 +573,7 @@ func addrToKey(addr rmgutil.Address) ([addrKeySize]byte, error) {
 		copy(result[1:], addr.Hash160()[:])
 		return result, nil
 
-	case *rmgutil.AddressAztec:
+	case *rmgutil.AddressProva:
 		var result [addrKeySize]byte
 		result[0] = addrKeyTypePubKeyHash
 		copy(result[1:], addr.ScriptAddress()[:])

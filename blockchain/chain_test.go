@@ -18,7 +18,7 @@ func TestHaveBlock(t *testing.T) {
 	// (genesis block) -> 1 -> 2 -> 3 -> 4
 	//                          \-> 3a
 	testFiles := []string{
-	// TODO(aztec): fix tests
+	// TODO(prova): fix tests
 	// "blk_0_to_4.dat.bz2",
 	// "blk_3A.dat.bz2",
 	}
@@ -82,7 +82,7 @@ func TestHaveBlock(t *testing.T) {
 		// Genesis block should be present (in the main chain).
 		{hash: chaincfg.MainNetParams.GenesisHash.String(), want: true},
 
-		// TODO(aztec): fix tests
+		// TODO(prova): fix tests
 		//Some Block should be present (on a side chain).
 		{hash: "2bc306279cb85ff16347e197e2185d9e76a88f1206e23174d5b919391957784f", want: true},
 

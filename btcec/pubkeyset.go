@@ -15,8 +15,25 @@ const (
 	ProvisionKeySet KeySetType = 1
 	IssueKeySet     KeySetType = 2
 	ValidateKeySet  KeySetType = 3
-	WspKeySet       KeySetType = 4
+	ASPKeySet       KeySetType = 4
 )
+
+func (kstype KeySetType) String() string {
+	switch kstype {
+	case RootKeySet:
+		return "ROOT"
+	case ProvisionKeySet:
+		return "PROVISION"
+	case IssueKeySet:
+		return "ISSUE"
+	case ValidateKeySet:
+		return "VALIDATE"
+	case ASPKeySet:
+		return "ASP"
+	default:
+		return ""
+	}
+}
 
 // ParsePubKeySet parses a list of ecdsa.Publickey for a koblitz curve from a
 // list of hex encoded strings, verifying that it is valid.

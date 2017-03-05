@@ -3759,7 +3759,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 	}
 }
 
-// TestSigHashNew tests that calcWitnessSignatureHash according to the digest scheme defined for Aztec.
+// TestSigHashNew tests that calcWitnessSignatureHash according to the digest scheme defined for Prova.
 func TestSigHashNew(t *testing.T) {
 	// Decode the serialized, unsigned transaction used within the BIP as an example:
 	//
@@ -3807,7 +3807,7 @@ func TestSigHashNew(t *testing.T) {
 		t.Fatalf("unable to decode script: %v", err)
 	}
 
-	// Finally, calculate the sigHash by digest scheme defined for Aztec.
+	// Finally, calculate the sigHash by digest scheme defined for Prova.
 	// nVersion:     01000000
 	// hashPrevouts: 96b827c8483d4e9b96712b6713a7b68d6e8003a781feba36c31143470b4efd37
 	// hashSequence: 52b0a642eea2fb7ae638c36f6252b6750293dbe574a806984b8e4d8548339a3b

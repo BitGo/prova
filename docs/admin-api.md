@@ -30,15 +30,15 @@ Valid key types:
 1. "issuing"
 2. "provisioning"
 3. "validate"
-4. "wsp"
+4. "asp"
 
-**Add WSP Key Example**:
+**Add ASP Key Example**:
 
 ```
 createrawadmintransaction
 [
-  "wsp",
-  "$wspPublicKey",   // Public key provided by the WSP
+  "asp",
+  "$aspPublicKey",   // Public key provided by the ASP
   1,                 // Make active
   "$lastUnspentTxId"
 ]
@@ -154,7 +154,7 @@ createrawdeissuancetransaction
 Parameters:
 
 1. hexEncodedRawDeissuanceTransaction (string, required)
-2. privateKey (string, required) // This can be a WSP key or an admin key
+2. privateKey (string, required) // This can be a ASP key or an admin key
 
 Returns: A hex encoded raw signed issuance transaction
 

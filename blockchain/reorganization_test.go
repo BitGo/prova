@@ -24,7 +24,7 @@ import (
 // The test blocks were originally from a post on the bitcoin talk forums:
 // https://bitcointalk.org/index.php?topic=46370.msg577556#msg577556
 //func TestReorganization(t *testing.T) {
-//TODO(aztec) fix test
+//TODO(prova) fix test
 func Reorganization(t *testing.T) {
 	// Intentionally load the side chain blocks out of order to ensure
 	// orphans are handled properly along with chain reorganization.

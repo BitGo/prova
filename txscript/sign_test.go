@@ -70,7 +70,7 @@ func mkGetScript(scripts map[string][]byte) txscript.ScriptDB {
 func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript []byte, pkScript []byte) error {
 	tx.TxIn[idx].SignatureScript = sigScript
 
-	// Before passing the script to the VM, we check whether it is an Aztec script.
+	// Before passing the script to the VM, we check whether it is an Prova script.
 	pops, err := txscript.ParseScript(pkScript)
 	if err != nil {
 		return fmt.Errorf("failed to parse script %s: %v", msg, err)
@@ -96,8 +96,8 @@ func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript
 	keySets[btcec.IssueKeySet] = keySet
 
 	keyView.SetKeys(keySets)
-	// If script is Aztec script, we replace all keyIDs with pubKeyHashes.
-	if txscript.TypeOfScript(pops) == txscript.AztecTy {
+	// If script is Prova script, we replace all keyIDs with pubKeyHashes.
+	if txscript.TypeOfScript(pops) == txscript.ProvaTy {
 		keyIDs, err := txscript.ExtractKeyIDs(pops)
 		keyIdMap := keyView.LookupKeyIDs(keyIDs)
 		txscript.ReplaceKeyIDs(pops, keyIdMap)
@@ -107,8 +107,8 @@ func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript
 		}
 	}
 
-	// If script is Aztec admin script, we replace the threadID with pubKeyHashes.
-	if txscript.TypeOfScript(pops) == txscript.AztecAdminTy {
+	// If script is Prova admin script, we replace the threadID with pubKeyHashes.
+	if txscript.TypeOfScript(pops) == txscript.ProvaAdminTy {
 		threadID, err := txscript.ExtractThreadID(pops)
 		keyHashes, err := keyView.GetAdminKeyHashes(threadID)
 		pkScript, err = txscript.ThreadPkScript(keyHashes)
@@ -194,7 +194,7 @@ func TestSignTxOutput(t *testing.T) {
 		LockTime: 0,
 	}
 
-	//Aztec Multisig
+	//Prova Multisig
 	//KeyID #1
 	keyId1 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 	key1, _ := btcec.PrivKeyFromBytes(btcec.S256(), []byte{
@@ -226,11 +226,11 @@ func TestSignTxOutput(t *testing.T) {
 		pk3 := (*btcec.PublicKey)(&key3.PublicKey)
 		pkHash := rmgutil.Hash160(pk3.SerializeCompressed())
 
-		//Creation of Aztec address
-		addr, err := rmgutil.NewAddressAztec(pkHash,
+		//Creation of Prova address
+		addr, err := rmgutil.NewAddressProva(pkHash,
 			[]btcec.KeyID{keyId1, keyId2}, &chaincfg.TestNet3Params)
 		if err != nil {
-			t.Errorf("failed to make Aztec address for %s: %v",
+			t.Errorf("failed to make Prova address for %s: %v",
 				msg, err)
 			break
 		}
@@ -258,7 +258,7 @@ func TestSignTxOutput(t *testing.T) {
 		}
 	}
 
-	// Two part Aztec Multisig, sign with one key then the other.
+	// Two part Prova Multisig, sign with one key then the other.
 	for i := range tx.TxIn {
 		msg := fmt.Sprintf("%d:%d", hashType, i)
 
@@ -272,11 +272,11 @@ func TestSignTxOutput(t *testing.T) {
 		pk3 := (*btcec.PublicKey)(&key3.PublicKey)
 		pkHash := rmgutil.Hash160(pk3.SerializeCompressed())
 
-		//Creation of Aztec address
-		addr, err := rmgutil.NewAddressAztec(pkHash,
+		//Creation of Prova address
+		addr, err := rmgutil.NewAddressProva(pkHash,
 			[]btcec.KeyID{keyId1, keyId2}, &chaincfg.TestNet3Params)
 		if err != nil {
-			t.Errorf("failed to make Aztec address for %s: %v",
+			t.Errorf("failed to make Prova address for %s: %v",
 				msg, err)
 			break
 		}
@@ -340,7 +340,7 @@ func TestSignTxOutput(t *testing.T) {
 		threadID := rmgutil.ThreadID(i)
 		msg := fmt.Sprintf("%d:%d", hashType, i)
 
-		scriptPkScript, err := txscript.AztecThreadScript(threadID)
+		scriptPkScript, err := txscript.ProvaThreadScript(threadID)
 		if err != nil {
 			t.Errorf("failed to make pkscript "+
 				"for %s: %v", msg, err)
@@ -365,7 +365,7 @@ func TestSignTxOutput(t *testing.T) {
 		threadID := rmgutil.ThreadID(i)
 		msg := fmt.Sprintf("%d:%d", hashType, i)
 
-		scriptPkScript, err := txscript.AztecThreadScript(threadID)
+		scriptPkScript, err := txscript.ProvaThreadScript(threadID)
 		if err != nil {
 			t.Errorf("failed to make pkscript "+
 				"for %s: %v", msg, err)

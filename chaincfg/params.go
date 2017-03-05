@@ -77,8 +77,8 @@ type Params struct {
 	// AdminKeySets is the set of keys governing the chain state.
 	AdminKeySets map[btcec.KeySetType]btcec.PublicKeySet
 
-	// WspKeyIdMap are the provisioned keyIDs and respective pubKeys
-	WspKeyIdMap btcec.KeyIdMap
+	// ASPKeyIdMap are the provisioned keyIDs and respective pubKeys
+	ASPKeyIdMap btcec.KeyIdMap
 
 	// PowLimit defines the highest allowed proof of work value for a block
 	// as a uint256.
@@ -112,12 +112,6 @@ type Params struct {
 	// networks and should not be set on a main network.
 	ReduceMinDifficulty bool
 
-	// MinDiffReductionTime is the amount of time after which the minimum
-	// required difficulty should be reduced when a block hasn't been found.
-	//
-	// NOTE: This only applies if ReduceMinDifficulty is true.
-	MinDiffReductionTime time.Duration
-
 	// GenerateSupported specifies whether or not CPU mining is allowed.
 	GenerateSupported bool
 
@@ -141,7 +135,7 @@ type Params struct {
 	// Address encoding magics
 	PubKeyHashAddrID byte // First byte of a P2PKH address
 	ScriptHashAddrID byte // First byte of a P2SH address
-	AztecAddrID      byte // First byte of an Aztec address
+	ProvaAddrID      byte // First byte of an Prova address
 	PrivateKeyID     byte // First byte of a WIF private key
 
 	// BIP32 hierarchical deterministic extended key magics
@@ -202,7 +196,6 @@ var MainNetParams = Params{
 	TargetTimespan:           time.Hour * 24 * 14, // 14 days
 	TargetTimePerBlock:       time.Minute,         // 1 minute
 	ReduceMinDifficulty:      false,
-	MinDiffReductionTime:     0,
 	GenerateSupported:        false,
 
 	// Checkpoints ordered from oldest to newest.
@@ -225,7 +218,7 @@ var MainNetParams = Params{
 	PubKeyHashAddrID: 0x00, // starts with 1
 	ScriptHashAddrID: 0x05, // starts with 3
 	PrivateKeyID:     0x80, // starts with 5 (uncompressed) or K (compressed)
-	AztecAddrID:      0x33, // starts with G
+	ProvaAddrID:      0x33, // starts with G
 
 	// BIP32 hierarchical deterministic extended key magics
 	HDPrivateKeyID: [4]byte{0x04, 0x88, 0xad, 0xe4}, // starts with xprv
@@ -286,15 +279,15 @@ var RegressionNetParams = Params{
 
 		//validate keys
 		keySets[btcec.ValidateKeySet], _ = btcec.ParsePubKeySet(btcec.S256(),
-			"035f5103852bd7d9c9c28e44caf1f7188941e16295062ca4c89928a8ccff993cd3", // TODO(aztec) add priv
-			"0265de49399e78020026219492e2a6e1a41e93591b87220ae8a2f3ebf3473dbeef", // TODO(aztec) add priv
-			"039cb94c99c4700918250c40fa35b7fa0a75a967c9366aa19b8fc354373368beef", // TODO(aztec) add priv
-			"031337ab09070254638075c7b59643dce2d60c5260bf5841d2f8cc6f75f6790d4e", // TODO(aztec) add priv
+			"035f5103852bd7d9c9c28e44caf1f7188941e16295062ca4c89928a8ccff993cd3", // TODO(prova) add priv
+			"0265de49399e78020026219492e2a6e1a41e93591b87220ae8a2f3ebf3473dbeef", // TODO(prova) add priv
+			"039cb94c99c4700918250c40fa35b7fa0a75a967c9366aa19b8fc354373368beef", // TODO(prova) add priv
+			"031337ab09070254638075c7b59643dce2d60c5260bf5841d2f8cc6f75f6790d4e", // TODO(prova) add priv
 		)
 
 		return keySets
 	}(),
-	WspKeyIdMap: func() btcec.KeyIdMap {
+	ASPKeyIdMap: func() btcec.KeyIdMap {
 		pubKey1, _ := btcec.ParsePubKey(hexToBytes("025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1"), btcec.S256())
 		pubKey2, _ := btcec.ParsePubKey(hexToBytes("038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202"), btcec.S256())
 		return map[btcec.KeyID]*btcec.PublicKey{btcec.KeyID(1): pubKey1, btcec.KeyID(2): pubKey2}
@@ -306,7 +299,6 @@ var RegressionNetParams = Params{
 	TargetTimespan:           time.Hour * 24 * 14, // 14 days
 	TargetTimePerBlock:       time.Minute,         // 1 minute
 	ReduceMinDifficulty:      true,
-	MinDiffReductionTime:     time.Minute * 20, // TargetTimePerBlock * 2
 	GenerateSupported:        true,
 
 	// Checkpoints ordered from oldest to newest.
@@ -328,7 +320,7 @@ var RegressionNetParams = Params{
 	// Address encoding magics
 	PubKeyHashAddrID: 0x6f, // starts with m or n
 	ScriptHashAddrID: 0xc4, // starts with 2
-	AztecAddrID:      0x58, // starts with T
+	ProvaAddrID:      0x58, // starts with T
 	PrivateKeyID:     0xef, // starts with 9 (uncompressed) or c (compressed)
 
 	// BIP32 hierarchical deterministic extended key magics
@@ -372,20 +364,18 @@ var TestNet3Params = Params{
 
 		//validator keys
 		keySets[btcec.ValidateKeySet], _ = btcec.ParsePubKeySet(btcec.S256(),
-			"035f5103852bd7d9c9c28e44caf1f7188941e16295062ca4c89928a8ccff993cd3", // TODO(aztec) add priv
-			"0265de49399e78020026219492e2a6e1a41e93591b87220ae8a2f3ebf3473dbeef", // TODO(aztec) add priv
-			"039cb94c99c4700918250c40fa35b7fa0a75a967c9366aa19b8fc354373368beef", // TODO(aztec) add priv
-			"031337ab09070254638075c7b59643dce2d60c5260bf5841d2f8cc6f75f6790d4e", // TODO(aztec) add priv
+			"035f5103852bd7d9c9c28e44caf1f7188941e16295062ca4c89928a8ccff993cd3", // TODO(prova) add priv
+			"0265de49399e78020026219492e2a6e1a41e93591b87220ae8a2f3ebf3473dbeef", // TODO(prova) add priv
+			"039cb94c99c4700918250c40fa35b7fa0a75a967c9366aa19b8fc354373368beef", // TODO(prova) add priv
+			"031337ab09070254638075c7b59643dce2d60c5260bf5841d2f8cc6f75f6790d4e", // TODO(prova) add priv
 		)
 
 		return keySets
 	}(),
-	WspKeyIdMap: func() btcec.KeyIdMap {
-		keyId1 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
+	ASPKeyIdMap: func() btcec.KeyIdMap {
 		pubKey1, _ := btcec.ParsePubKey(hexToBytes("025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1"), btcec.S256())
-		keyId2 := btcec.KeyIDFromAddressBuffer([]byte{1, 0, 0, 0})
 		pubKey2, _ := btcec.ParsePubKey(hexToBytes("038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202"), btcec.S256())
-		return map[btcec.KeyID]*btcec.PublicKey{keyId1: pubKey1, keyId2: pubKey2}
+		return map[btcec.KeyID]*btcec.PublicKey{btcec.KeyID(1): pubKey1, btcec.KeyID(2): pubKey2}
 	}(),
 	PowLimit:                 testNet3PowLimit,
 	PowLimitBits:             0x2007ffff,
@@ -394,7 +384,6 @@ var TestNet3Params = Params{
 	TargetTimespan:           time.Hour * 24 * 14, // 14 days
 	TargetTimePerBlock:       time.Minute,         // 1 minute
 	ReduceMinDifficulty:      true,
-	MinDiffReductionTime:     time.Minute * 20, // TargetTimePerBlock * 2
 	GenerateSupported:        false,
 
 	// Checkpoints ordered from oldest to newest.
@@ -417,7 +406,7 @@ var TestNet3Params = Params{
 	PubKeyHashAddrID: 0x6f, // starts with m or n
 	ScriptHashAddrID: 0xc4, // starts with 2
 	PrivateKeyID:     0xef, // starts with 9 (uncompressed) or c (compressed)
-	AztecAddrID:      0x58, // starts with T
+	ProvaAddrID:      0x58, // starts with T
 
 	// BIP32 hierarchical deterministic extended key magics
 	HDPrivateKeyID: [4]byte{0x04, 0x35, 0x83, 0x94}, // starts with tprv
@@ -466,7 +455,6 @@ var SimNetParams = Params{
 	TargetTimespan:           time.Hour * 24 * 14, // 14 days
 	TargetTimePerBlock:       time.Minute,         // 1 minutes
 	ReduceMinDifficulty:      true,
-	MinDiffReductionTime:     time.Minute * 20, // TargetTimePerBlock * 2
 	GenerateSupported:        true,
 
 	// Checkpoints ordered from oldest to newest.
@@ -530,7 +518,7 @@ var (
 	registeredNets    = make(map[wire.BitcoinNet]struct{})
 	pubKeyHashAddrIDs = make(map[byte]struct{})
 	scriptHashAddrIDs = make(map[byte]struct{})
-	aztecAddrIDs      = make(map[byte]struct{})
+	provaAddrIDs      = make(map[byte]struct{})
 	hdPrivToPubKeyIDs = make(map[[4]byte][]byte)
 )
 
@@ -550,8 +538,8 @@ func Register(params *Params) error {
 	registeredNets[params.Net] = struct{}{}
 	pubKeyHashAddrIDs[params.PubKeyHashAddrID] = struct{}{}
 	scriptHashAddrIDs[params.ScriptHashAddrID] = struct{}{}
-	if params.AztecAddrID != 0 {
-		aztecAddrIDs[params.AztecAddrID] = struct{}{}
+	if params.ProvaAddrID != 0 {
+		provaAddrIDs[params.ProvaAddrID] = struct{}{}
 	}
 	hdPrivToPubKeyIDs[params.HDPrivateKeyID] = params.HDPublicKeyID[:]
 	return nil
@@ -587,11 +575,11 @@ func IsScriptHashAddrID(id byte) bool {
 	return ok
 }
 
-// IsAztecAddrID returns whether the id is an identifier known to prefix a
-// standard Aztec address on any default or registered network.  This is
+// IsProvaAddrID returns whether the id is an identifier known to prefix a
+// standard Prova address on any default or registered network.  This is
 // used when decoding an address string into a specific address type.
-func IsAztecAddrID(id byte) bool {
-	_, ok := aztecAddrIDs[id]
+func IsProvaAddrID(id byte) bool {
+	_, ok := provaAddrIDs[id]
 	return ok
 }
 

@@ -7,30 +7,6 @@
 
 package btcjson
 
-// CreateRawAdminTransactionCmd defines the createrawadmintransaction
-// JSON-RPC command.
-type CreateRawAdminTransactionCmd struct {
-	Txid    string  `json:"txid"`
-	KeyType string  `json:"keytype"`
-	Active  bool    `json:"active"`
-	PubKey  string  `json:"pubkey"`
-	KeyId   *uint32 `json:"keyid"`
-}
-
-// NewCreateRawAdminTransactionCmd returns a new instance which can be used
-// to issue a createrawadmintransaction JSON-RPC command.
-func NewCreateRawAdminTransactionCmd(txid string, keyType string, active bool,
-	pubKey string, keyId *uint32) *CreateRawAdminTransactionCmd {
-
-	return &CreateRawAdminTransactionCmd{
-		Txid:    txid,
-		KeyType: keyType,
-		Active:  active,
-		PubKey:  pubKey,
-		KeyId:   keyId,
-	}
-}
-
 // SetValidateKeysCmd defines the setvalidatekeys JSON-RPC command.
 // This command is not a standard command, it is an extension for operating
 // rmgd.

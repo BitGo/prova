@@ -17,7 +17,7 @@ func TestMerkle(t *testing.T) {
 	block := rmgutil.NewBlock(&SomeBlock)
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions())
 	calculatedMerkleRoot := merkles[len(merkles)-1]
-	// TODO(aztec) clean this up and generate a new block with correct merkle root
+	// TODO(prova) clean this up and generate a new block with correct merkle root
 	merkleStr := "fe174a6ec736a412d8cc3e02328d1b1d250e24127dd74484dfa257bf983135f8"
 	wantMerkle, _ := chainhash.NewHashFromStr(merkleStr)
 	if !wantMerkle.IsEqual(calculatedMerkleRoot) {

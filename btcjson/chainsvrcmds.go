@@ -72,27 +72,6 @@ func NewCreateRawTransactionCmd(inputs []TransactionInput, amounts map[string]fl
 	}
 }
 
-// PrepareAztecTransactionCmd defines the prepareaztectransaction JSON-RPC command.
-type PrepareAztecTransactionCmd struct {
-	Inputs   []TransactionInput
-	Amounts  map[string]float64 `jsonrpcusage:"{\"address\":amount,...}"` // In RMG
-	LockTime *int64
-}
-
-// NewPrepareAztecTransactionCmd returns a new instance which can be used to issue
-// a prepareaztectransaction JSON-RPC command.
-//
-// Amounts are in RMG.
-func NewPrepareAztecTransactionCmd(inputs []TransactionInput, amounts map[string]float64,
-	lockTime *int64) *PrepareAztecTransactionCmd {
-
-	return &PrepareAztecTransactionCmd{
-		Inputs:   inputs,
-		Amounts:  amounts,
-		LockTime: lockTime,
-	}
-}
-
 // DecodeRawTransactionCmd defines the decoderawtransaction JSON-RPC command.
 type DecodeRawTransactionCmd struct {
 	HexTx string
@@ -106,16 +85,16 @@ func NewDecodeRawTransactionCmd(hexTx string) *DecodeRawTransactionCmd {
 	}
 }
 
-// SignAztecTransactionCmd defines the signaztectransaction JSON-RPC command.
-type SignAztecTransactionCmd struct {
+// SignProvaTransactionCmd defines the signprovatransaction JSON-RPC command.
+type SignProvaTransactionCmd struct {
 	HexTx    string
 	PrivKeys *[]string
 }
 
-// NewSignAztecTransactionCmd returns a new instance which can be used to issue
-// a signaztectransaction JSON-RPC command.
-func NewSignAztecTransactionCmd(hexTx string, privKeys *[]string) *SignAztecTransactionCmd {
-	return &SignAztecTransactionCmd{
+// NewSignProvaTransactionCmd returns a new instance which can be used to issue
+// a signprovatransaction JSON-RPC command.
+func NewSignProvaTransactionCmd(hexTx string, privKeys *[]string) *SignProvaTransactionCmd {
+	return &SignProvaTransactionCmd{
 		HexTx:    hexTx,
 		PrivKeys: privKeys,
 	}
@@ -770,7 +749,6 @@ func init() {
 
 	MustRegisterCmd("addnode", (*AddNodeCmd)(nil), flags)
 	MustRegisterCmd("createrawtransaction", (*CreateRawTransactionCmd)(nil), flags)
-	MustRegisterCmd("createrawadmintransaction", (*CreateRawAdminTransactionCmd)(nil), flags)
 	MustRegisterCmd("decoderawtransaction", (*DecodeRawTransactionCmd)(nil), flags)
 	MustRegisterCmd("decodescript", (*DecodeScriptCmd)(nil), flags)
 	MustRegisterCmd("getaddresstxids", (*GetAddressTxIdsCmd)(nil), flags)
@@ -804,12 +782,11 @@ func init() {
 	MustRegisterCmd("help", (*HelpCmd)(nil), flags)
 	MustRegisterCmd("invalidateblock", (*InvalidateBlockCmd)(nil), flags)
 	MustRegisterCmd("ping", (*PingCmd)(nil), flags)
-	MustRegisterCmd("prepareaztectransaction", (*PrepareAztecTransactionCmd)(nil), flags)
 	MustRegisterCmd("reconsiderblock", (*ReconsiderBlockCmd)(nil), flags)
 	MustRegisterCmd("searchrawtransactions", (*SearchRawTransactionsCmd)(nil), flags)
 	MustRegisterCmd("sendrawtransaction", (*SendRawTransactionCmd)(nil), flags)
 	MustRegisterCmd("setgenerate", (*SetGenerateCmd)(nil), flags)
-	MustRegisterCmd("signaztectransaction", (*SignAztecTransactionCmd)(nil), flags)
+	MustRegisterCmd("signprovatransaction", (*SignProvaTransactionCmd)(nil), flags)
 	MustRegisterCmd("stop", (*StopCmd)(nil), flags)
 	MustRegisterCmd("submitblock", (*SubmitBlockCmd)(nil), flags)
 	MustRegisterCmd("validateaddress", (*ValidateAddressCmd)(nil), flags)

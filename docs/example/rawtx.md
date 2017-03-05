@@ -1,5 +1,8 @@
 # Example Transactions
 
+These example transactions are provided for developers as easy reference points for testing
+valid transactions in the Prova blockchain.
+
 ## Coinbase Transaction
 
 ```

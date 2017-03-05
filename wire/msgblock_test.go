@@ -522,7 +522,7 @@ func TestBlockSerializeSize(t *testing.T) {
 }
 
 // blockOne is the first block in the mainnet block chain.
-// TODO(aztec): add in test data for validating pubKey and signature
+// TODO(prova): add in test data for validating pubKey and signature
 var blockOne = MsgBlock{
 	Header: BlockHeader{
 		Version: 1,

@@ -314,7 +314,7 @@ func newPoolHarness(chainParams *chaincfg.Params) (*poolHarness, []spendableOutp
 	keyId2 := btcec.KeyIDFromAddressBuffer([]byte{0, 0, 1, 0})
 
 	// Generate associated Prova address and resulting payment script.
-	payAddr, err := rmgutil.NewAddressAztec(pkHash, []btcec.KeyID{keyId1, keyId2}, chainParams)
+	payAddr, err := rmgutil.NewAddressProva(pkHash, []btcec.KeyID{keyId1, keyId2}, chainParams)
 	if err != nil {
 		return nil, nil, err
 	}

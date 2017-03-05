@@ -77,9 +77,9 @@ type GetAddedNodeInfoResult struct {
 	Addresses *[]GetAddedNodeInfoResultAddr `json:"addresses,omitempty"`
 }
 
-// WspKeyIdResult models the data of the WpsKeys portion of the
+// ASPKeyIdResult models the data of the ASPKeys portion of the
 // GetAdminInfoResult command.
-type WspKeyIdResult struct {
+type ASPKeyIdResult struct {
 	PubKey string `json:"pubkey"`
 	KeyID  uint32 `json:"keyid"`
 }
@@ -102,7 +102,7 @@ type GetAdminInfoResult struct {
 	ProvisionKeys []string          `json:"provisionkeys,omitempty"`
 	IssueKeys     []string          `json:"issuekeys,omitempty"`
 	ValidateKeys  []string          `json:"validatekeys,omitempty"`
-	WspKeys       []WspKeyIdResult  `json:"wspkeys,omitempty"`
+	ASPKeys       []ASPKeyIdResult  `json:"aspkeys,omitempty"`
 }
 
 // GetBlockChainInfoResult models the data returned from the getblockchaininfo
@@ -233,6 +233,7 @@ type ScriptPubKeyResult struct {
 	Hex       string   `json:"hex,omitempty"`
 	ReqSigs   int32    `json:"reqSigs,omitempty"`
 	Type      string   `json:"type"`
+	AdminOp   string   `json:"adminOp,omitempty"`
 	Addresses []string `json:"addresses,omitempty"`
 }
 

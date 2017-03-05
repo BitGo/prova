@@ -45,7 +45,7 @@ func encodeAddress(hash160 []byte, netID byte) string {
 	return base58.CheckEncode(hash160[:ripemd160.Size], netID)
 }
 
-func encodeAztecAddress(keyIDs []btcec.KeyID, hash160 []byte, netID byte) string {
+func encodeProvaAddress(keyIDs []btcec.KeyID, hash160 []byte, netID byte) string {
 	data := make([]byte, 2*btcec.KeyIDSize+ripemd160.Size)
 	copy(data[0:], hash160)
 	offset := ripemd160.Size
@@ -54,7 +54,7 @@ func encodeAztecAddress(keyIDs []btcec.KeyID, hash160 []byte, netID byte) string
 	return base58.CheckEncode(data, netID)
 }
 
-// TODO(aztec): Modify this interface to handle only Aztec-form addresses. No need
+// TODO(prova): Modify this interface to handle only Prova-form addresses. No need
 // to retain the old interface / address types.
 //
 // Address is an interface type for any type of destination a transaction
@@ -117,11 +117,11 @@ func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 		return nil, errors.New("decoded address is of unknown format")
 	}
 
-	if chaincfg.IsAztecAddrID(netID) {
+	if chaincfg.IsProvaAddrID(netID) {
 		if len(decoded) != ripemd160.Size+2*btcec.KeyIDSize {
 			return nil, errors.New("decoded address is of unknown size")
 		}
-		return newAddressAztecFromBytes(decoded, netID)
+		return newAddressProvaFromBytes(decoded, netID)
 	}
 
 	switch len(decoded) {
@@ -144,25 +144,25 @@ func DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 	}
 }
 
-// AddressAztec is a standard 2-of-3 Aztec address
-type AddressAztec struct {
+// AddressProva is a standard 2-of-3 Prova address
+type AddressProva struct {
 	keyIDs [2]btcec.KeyID
 	hash   [ripemd160.Size]byte
 	netID  byte
 }
 
-// NewAddressAztec returns a new AddressAztec.  pkHash mustbe 20
+// NewAddressProva returns a new AddressProva.  pkHash mustbe 20
 // bytes.
-func NewAddressAztec(pkHash []byte, keyIDs []btcec.KeyID, net *chaincfg.Params) (*AddressAztec, error) {
-	return newAddressAztec(pkHash, keyIDs, net.AztecAddrID)
+func NewAddressProva(pkHash []byte, keyIDs []btcec.KeyID, net *chaincfg.Params) (*AddressProva, error) {
+	return newAddressProva(pkHash, keyIDs, net.ProvaAddrID)
 }
 
-// newAddressAztec is the internal API to create an Aztec address
+// newAddressProva is the internal API to create an Prova address
 // with a known leading identifier byte for a network, rather than looking
 // it up through its parameters.  This is useful when creating a new address
 // structure from a string encoding where the identifer byte is already
 // known.
-func newAddressAztec(pkHash []byte, keyIDs []btcec.KeyID, netID byte) (*AddressAztec, error) {
+func newAddressProva(pkHash []byte, keyIDs []btcec.KeyID, netID byte) (*AddressProva, error) {
 	// Check for a valid pubkey hash length.
 	if len(pkHash) != ripemd160.Size {
 		return nil, errors.New("pkHash must be 20 bytes")
@@ -172,51 +172,51 @@ func newAddressAztec(pkHash []byte, keyIDs []btcec.KeyID, netID byte) (*AddressA
 		return nil, errors.New("keyIDs must have length 2")
 	}
 
-	addr := &AddressAztec{netID: netID}
+	addr := &AddressProva{netID: netID}
 	copy(addr.hash[:], pkHash)
 	addr.keyIDs[0] = keyIDs[0]
 	addr.keyIDs[1] = keyIDs[1]
 	return addr, nil
 }
 
-// newAddressAztecFromBytes is the internal API to create an Aztec address
+// newAddressProvaFromBytes is the internal API to create an Prova address
 // directly from the encoded bytes
-func newAddressAztecFromBytes(data []byte, netID byte) (*AddressAztec, error) {
+func newAddressProvaFromBytes(data []byte, netID byte) (*AddressProva, error) {
 	offset := ripemd160.Size
 	keyIDs := []btcec.KeyID{
 		btcec.KeyIDFromAddressBuffer(data[offset:]),
 		btcec.KeyIDFromAddressBuffer(data[offset+btcec.KeyIDSize:]),
 	}
-	return newAddressAztec(data[0:offset], keyIDs, netID)
+	return newAddressProva(data[0:offset], keyIDs, netID)
 }
 
-// EncodeAddress returns the string encoding of an Aztec address.
+// EncodeAddress returns the string encoding of an Prova address.
 // Part of the Address interface.
-func (a *AddressAztec) EncodeAddress() string {
-	return encodeAztecAddress(a.keyIDs[:], a.hash[:], a.netID)
+func (a *AddressProva) EncodeAddress() string {
+	return encodeProvaAddress(a.keyIDs[:], a.hash[:], a.netID)
 }
 
-// ScriptAddress returns the bytes to be included in a txout script for an Aztec address.
+// ScriptAddress returns the bytes to be included in a txout script for an Prova address.
 // Part of the Address interface.
-func (a *AddressAztec) ScriptAddress() []byte {
+func (a *AddressProva) ScriptAddress() []byte {
 	return a.hash[:]
 }
 
-// ScriptKeyIDs returns the key ids to be included in a txout script for an Aztec address.
-func (a *AddressAztec) ScriptKeyIDs() []btcec.KeyID {
+// ScriptKeyIDs returns the key ids to be included in a txout script for an Prova address.
+func (a *AddressProva) ScriptKeyIDs() []btcec.KeyID {
 	return a.keyIDs[:]
 }
 
-// IsForNet returns whether or not the Aztec address is associated
+// IsForNet returns whether or not the Prova address is associated
 // with the passed bitcoin network.
-func (a *AddressAztec) IsForNet(net *chaincfg.Params) bool {
-	return a.netID == net.AztecAddrID
+func (a *AddressProva) IsForNet(net *chaincfg.Params) bool {
+	return a.netID == net.ProvaAddrID
 }
 
-// String returns a human-readable string for the Aztec address type.
+// String returns a human-readable string for the Prova address type.
 // This is equivalent to calling EncodeAddress, but is provided so the type can
 // be used as a fmt.Stringer.
-func (a *AddressAztec) String() string {
+func (a *AddressProva) String() string {
 	return a.EncodeAddress()
 }
 

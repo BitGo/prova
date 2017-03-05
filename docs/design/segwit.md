@@ -1,7 +1,6 @@
-# Segregated Witness for RMG
+# Segregated Witness for Prova
 
-When designing a new blockchain, the many lessons learned from Bitcoin over the last 8 years can be incorporated. The benefits introduced in the Segregated Witness (SegWit) proposal are examined in this design document and applied to the design of the RMG chain, while avoiding any
-awkward compromises due to SegWit being deployed as a soft fork in Bitcoin.
+When designing a new blockchain, the many lessons learned from Bitcoin over the last 8 years can be incorporated. The benefits introduced in the Segregated Witness (SegWit) proposal are examined in this design document and applied to the design of the Prova chain, while avoiding any compromises due to SegWit being deployed as a soft fork in Bitcoin.
 
 ## Segregated Witness Components
 
@@ -17,21 +16,23 @@ The Segregated Witness proposal consists of the following Bitcoin Improvement Pr
 | [BIP 0146](https://github.com/bitcoin/bips/blob/master/bip-0146.mediawiki) | signature encoding malleability | | |
 | [BIP 0147](https://github.com/bitcoin/bips/blob/master/bip-0147.mediawiki) | dummy stack element malleability | BIP9 | Partially adopted |
 
-**How RMG chain applies it:**
+**How Prova chain applies it:**
 
-The improvements provided by SegWit which the RMG chain incorporates are:
+The improvements provided by SegWit which the Prova chain incorporates are:
 
 1. Eliminate 3rd party malleability
 2. Commit to input values (benefits hardware wallets)
 3. Eliminate the O(N^2) hashing problem seen when validating signatures
 
-SegWit also, by separating the signatures from the transaction itself, gives a clever way to increase the effective block space without doing a hard fork. We don’t care about this for RMG, and so, signatures will remain with the transactions themselves.
+SegWit also, by separating the signatures from the transaction itself, gives a clever way to increase the effective block space without doing a hard fork. We don’t care about this for Prova, and so, signatures will remain with the transactions themselves.
 
 ## Malleability Fixes
+
 In Bitcoin, the transaction IDs are hashes of the entire transaction, including signatures. Unfortunately, ECDSA signatures, as encoded in transactions, allow anyone to make modifications to it (third-party malleability) that will not invalidate it, but will change the transaction ID. Because Transaction IDs are used in inputs of other transaction, dependent unconfirmed transactions become invalid if a malleated version of the original transaction is mined. SegWit proposes a new non-malleable transaction ID and a new structure to commit to transactions in the block header.
 
 ### Merkle Root
-The RMG chain takes a similar approach to SegWit in Bitcoin. The Merkle root becomes the hash of the roots of 2 separate Merkle sub-trees.
+
+The Prova chain takes a similar approach to SegWit in Bitcoin. The Merkle root becomes the hash of the roots of 2 separate Merkle sub-trees.
 The first tree commits to the Transaction IDs, while the second tree commits to the hashes of each transaction with the signatures included.
 
 ![Figure 1](segwit-fig1.png)
@@ -39,25 +40,28 @@ The first tree commits to the Transaction IDs, while the second tree commits to 
 Figure 1 shows the serialized structure of a transaction and how scriptSigs (Sig and PubKey) are removed before the Transaction ID is calculated from the serialized transaction.
 
 ### Block Header Commitment in Bitcoin
+
 SegWit extracts the signature information into a separate Merkle tree, which only nodes that want to validate the signatures need to be aware of. As both, stripped transaction IDs and conventional transaction IDs need to be committed to in the block header, this separate merkle tree is included through the coinbase transaction of the miner.
 
-**How RMG chain does it:**
+**How Prova chain does it:**
 
-The RMG chain does not need to keep backwards compatibility, hence, it can commit to both Merkle trees directly in the header.
+The Prova chain does not need to keep backwards compatibility, hence, it can commit to both Merkle trees directly in the header.
 
 ![Figure 2](segwit-fig2.png)
 
 Figure 2 shows how the RMG chain constructs merkle trees of TxIDs and TxIDWithSigs and then combines the merkle trees by hashing both roots into a new root, which is written to the block header.
 
 ## Transaction Digest Algorithm
+
 Before a transaction can be signed, it is serialized in a certain format and hashed. The data that is included in the serialization and the way hashing is applied are addressed by BIP 143.
 
 ### Signing of Input Values
+
 BIP 143 defines a new transaction digest algorithm that commits to the values of the inputs. This way an offline air-gapped wallet can sign input values that it learned from an untrusted source. If the values are wrong, the tx is invalid, and no coins lost.
 
-***How RMG chain does it:***
+***How Prova chain does it:***
 
-The RMG implementation adopts a modified version of the BIP 143 proposal for digests as follows:
+The Prova implementation adopts a modified version of the BIP 143 proposal for digests as follows:
 
 ```
 Double SHA256 of the serialization of:
@@ -76,10 +80,11 @@ Double SHA256 of the serialization of:
 The serialization is as proposed, except the commitment to the input’s scriptCode. (TBD: We may add this back)
 
 ### Linear Scaling of Sighash Operations
+
 The verification time of a block scales quadratically rather than linearly with the number of inputs to a Bitcoin transaction. This problem is addressed by the SegWit proposal in BIP 143.
 
 SegWit applies a layered hashing method to different parts of the data so that each byte only needs to be hashed at most twice. This digest structure also allows to use hash caches, which reduces the complexity of verifying all transactions in a block to O(n).
 
-**How RMG chain applies it:**
+**How Prova chain applies it:**
 
-The RMG chain fully adopts this proposal and also employs hash caches for verification.
+The Prova chain fully adopts this proposal and also employs hash caches for verification.

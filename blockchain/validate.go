@@ -232,7 +232,7 @@ func CheckTransactionSanity(tx *rmgutil.Tx) error {
 
 		// Only first output can be admin output
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
-		if scriptClass == txscript.AztecAdminTy {
+		if scriptClass == txscript.ProvaAdminTy {
 			if txOutIndex != 0 {
 				str := fmt.Sprintf("transaction output %d: admin output "+
 					"only allowed at position 0.", txOutIndex)
@@ -250,7 +250,7 @@ func CheckTransactionSanity(tx *rmgutil.Tx) error {
 				}
 			} else {
 				// take care of issue thread
-				// If issuance/destruction tx, any non-nulldata outputs must be valid Aztec scripts
+				// If issuance/destruction tx, any non-nulldata outputs must be valid Prova scripts
 				isDestruction := len(msgTx.TxIn) > 1
 				if txOutIndex > 0 {
 					pops := adminOutputs[txOutIndex-1]
@@ -275,8 +275,8 @@ func CheckTransactionSanity(tx *rmgutil.Tx) error {
 							}
 						}
 					} else {
-						if scriptType != txscript.AztecTy &&
-							scriptType != txscript.GeneralAztecTy {
+						if scriptType != txscript.ProvaTy &&
+							scriptType != txscript.GeneralProvaTy {
 							str := fmt.Sprintf("admin issue transaction %v "+
 								"expected to have prova output at %d, "+
 								"but found %x.", tx.Hash, txOutIndex, pops)
@@ -306,9 +306,9 @@ func CheckTransactionSanity(tx *rmgutil.Tx) error {
 
 	// Coinbase script length must be between min and max length.
 	if IsCoinBase(tx) {
-		// Coinbase tx must be a standard aztec tx
-		if !txscript.IsAztecTx(tx) {
-			// TODO(aztec): fix the blockchain tests
+		// Coinbase tx must be a standard prova tx
+		if !txscript.IsProvaTx(tx) {
+			// TODO(prova): fix the blockchain tests
 			return ruleError(ErrInvalidCoinbase, "coinbase transaction is not of an allowed form")
 		}
 		slen := len(msgTx.TxIn[0].SignatureScript)
@@ -356,8 +356,8 @@ func CheckTransactionSanity(tx *rmgutil.Tx) error {
 		}
 	}
 
-	if !(threadInt >= 0) && !txscript.IsAztecTx(tx) {
-		// TODO(aztec): fix the blockchain tests
+	if !(threadInt >= 0) && !txscript.IsProvaTx(tx) {
+		// TODO(prova): fix the blockchain tests
 		return ruleError(ErrInvalidTx, "transaction is not of an allowed form")
 	}
 
@@ -527,7 +527,7 @@ func checkBlockHeaderSanity(header *wire.BlockHeader, powLimit *big.Int, timeSou
 	}
 
 	// Ensure the block time is not too far in the future.
-	//TODO(aztec) fix test
+	//TODO(prova) fix test
 	// maxTimestamp := timeSource.AdjustedTime().Add(time.Second *
 	// 	MaxTimeOffsetSeconds)
 	// if header.Timestamp.After(maxTimestamp) {
@@ -703,7 +703,7 @@ func (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode 
 		}
 
 		// Verify the block's signature by an active validate key.
-		// TODO(aztec): confirm that the validating pubkey is valid
+		// TODO(prova): confirm that the validating pubkey is valid
 		pubKey, err := btcec.ParsePubKey(header.ValidatingPubKey[:], btcec.S256())
 		if err != nil {
 			return err
@@ -745,7 +745,7 @@ func (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode 
 		return ruleError(ErrForkTooOld, str)
 	}
 
-	// TODO(aztec): clean up / remove
+	// TODO(prova): clean up / remove
 	if !fastAdd {
 		// Reject version 3 blocks once a majority of the network has
 		// upgraded.  This is part of BIP0065.
@@ -900,7 +900,7 @@ func CheckTransactionInputs(tx *rmgutil.Tx, txHeight uint32, utxoView *UtxoViewp
 		// transactions
 		originPkScript := utxoEntry.PkScriptByIndex(txIn.PreviousOutPoint.Index)
 		thisPkScript := tx.MsgTx().TxOut[0].PkScript
-		if txscript.GetScriptClass(originPkScript) == txscript.AztecAdminTy {
+		if txscript.GetScriptClass(originPkScript) == txscript.ProvaAdminTy {
 			if txInIndex != 0 {
 				str := fmt.Sprintf("transaction %v tried to spend admin "+
 					"thread transaction %v with input at position "+
@@ -1062,7 +1062,7 @@ func CheckTransactionInputs(tx *rmgutil.Tx, txHeight uint32, utxoView *UtxoViewp
 func CheckProvaOutput(tx *rmgutil.Tx, txOutIndex int, keyIDs []btcec.KeyID,
 	keyView *KeyViewpoint) error {
 	for _, keyID := range keyIDs {
-		if keyView.wspKeyIdMap[keyID] == nil {
+		if keyView.aspKeyIdMap[keyID] == nil {
 			str := fmt.Sprintf("transaction %v output %v has unknown "+
 				"keyID %v.", tx.Hash(), txOutIndex, keyID)
 			return ruleError(ErrInvalidTx, str)
@@ -1116,11 +1116,11 @@ func CheckTransactionOutputs(tx *rmgutil.Tx, keyView *KeyViewpoint) error {
 	for i := 0; i < len(adminOutputs); i++ {
 		isAddOp, keySetType, pubKey,
 			keyID := txscript.ExtractAdminOpData(adminOutputs[i])
-		if keySetType == btcec.WspKeySet {
+		if keySetType == btcec.ASPKeySet {
 			// TODO(prova): check pubKey collisions
 			// TODO(prova): check strictly increasing keyID
 			if isAddOp {
-				if keyView.wspKeyIdMap[keyID] != nil {
+				if keyView.aspKeyIdMap[keyID] != nil {
 					str := fmt.Sprintf("keyID %v added in transaction %v "+
 						"exists already in admin set. Operation "+
 						"rejected.", keyID, tx.Hash())
@@ -1132,7 +1132,7 @@ func CheckTransactionOutputs(tx *rmgutil.Tx, keyView *KeyViewpoint) error {
 					return ruleError(ErrInvalidAdminOp, str)
 				}
 			} else {
-				if keyView.wspKeyIdMap[keyID] == nil {
+				if keyView.aspKeyIdMap[keyID] == nil {
 					str := fmt.Sprintf("keyID %v can not be revoked in "+
 						"transaction %v. It does not exist in admin set.",
 						keyID, tx.Hash())
@@ -1505,6 +1505,6 @@ func (b *BlockChain) CheckConnectBlock(block *rmgutil.Block) error {
 	keyView.SetLastKeyID(b.lastKeyID)
 	keyView.SetTotalSupply(b.totalSupply)
 	keyView.SetKeys(b.adminKeySets)
-	keyView.SetKeyIDs(b.wspKeyIdMap)
+	keyView.SetKeyIDs(b.aspKeyIdMap)
 	return b.checkConnectBlock(newNode, block, utxoView, keyView, nil)
 }

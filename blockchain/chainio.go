@@ -949,7 +949,7 @@ func dbFetchHashByHeight(dbTx database.Tx, height uint32) (*chainhash.Hash, erro
 
 // -----------------------------------------------------------------------------
 // The key set consists of sets of keys that are used to administrate the chain.
-// The sets are ROOT, PROVISION, ISSUE, WSP, and VALIDATE keys.
+// The sets are ROOT, PROVISION, ISSUE, ASP, and VALIDATE keys.
 //
 //
 // The serialized format is:
@@ -968,8 +968,8 @@ func dbFetchHashByHeight(dbTx database.Tx, height uint32) (*chainhash.Hash, erro
 //   issue keys            []byte      issue key length * 33
 //   validate keys length  uint32      4 bytes
 //   validate keys         []byte      Validate length * 33
-//   WSP keys length       uint32      4 bytes
-//   keyID / WSP keys      []pairs     Pair length * 37
+//   ASP keys length       uint32      4 bytes
+//   keyID / ASP keys      []pairs     Pair length * 37
 
 // -----------------------------------------------------------------------------
 
@@ -991,7 +991,7 @@ var threadOrder = []rmgutil.ThreadID{
 // serializeKeySet returns the serialization of the passed key sets.
 // This is data to be stored in the key bucket.
 func serializeKeySet(adminKeySets map[btcec.KeySetType]btcec.PublicKeySet,
-	wspKeyIdMap btcec.KeyIdMap, threadTips map[rmgutil.ThreadID]*wire.OutPoint,
+	aspKeyIdMap btcec.KeyIdMap, threadTips map[rmgutil.ThreadID]*wire.OutPoint,
 	lastKeyID btcec.KeyID, totalSupply uint64) []byte {
 	// Calculate the full size needed to serialize the chain state.
 	serializedLen := uint32(0)
@@ -1001,7 +1001,7 @@ func serializeKeySet(adminKeySets map[btcec.KeySetType]btcec.PublicKeySet,
 		serializedLen += 4 //one uint32 for size of key set
 		serializedLen += uint32(len(adminKeySets[keySet]) * btcec.PubKeyBytesLenCompressed)
 	}
-	serializedLen += 4 + uint32(len(wspKeyIdMap)*(4+btcec.PubKeyBytesLenCompressed))
+	serializedLen += 4 + uint32(len(aspKeyIdMap)*(4+btcec.PubKeyBytesLenCompressed))
 	// Serialize the chain state.
 	serializedData := make([]byte, serializedLen)
 	offset := 0
@@ -1034,19 +1034,19 @@ func serializeKeySet(adminKeySets map[btcec.KeySetType]btcec.PublicKeySet,
 			offset += btcec.PubKeyBytesLenCompressed
 		}
 	}
-	// Serialize keyID to WSP Key map
-	byteOrder.PutUint32(serializedData[offset:], uint32(len(wspKeyIdMap)))
+	// Serialize keyID to ASP Key map
+	byteOrder.PutUint32(serializedData[offset:], uint32(len(aspKeyIdMap)))
 	offset += 4
 
 	// To have a deterministic order of serialization of a map, we take all keys
 	// and sort them by keyID, then serialize in that order.
 	var keyIDs []int
-	for k := range wspKeyIdMap {
+	for k := range aspKeyIdMap {
 		keyIDs = append(keyIDs, int(k))
 	}
 	sort.Ints(keyIDs)
 	for _, keyID := range keyIDs {
-		pubKey := wspKeyIdMap[btcec.KeyID(keyID)]
+		pubKey := aspKeyIdMap[btcec.KeyID(keyID)]
 		byteOrder.PutUint32(serializedData[offset:], uint32(keyID))
 		offset += 4
 		copy(serializedData[offset:], pubKey.SerializeCompressed())
@@ -1133,17 +1133,17 @@ func deserializeKeySet(serializedData []byte) (
 			Description: "corrupt admin state, not all keyIDs can be read",
 		}
 	}
-	wspKeyIdMap := make(map[btcec.KeyID]*btcec.PublicKey)
+	aspKeyIdMap := make(map[btcec.KeyID]*btcec.PublicKey)
 	for i := 0; i < int(keyIdMapLen); i++ {
 		keyID := btcec.KeyID(byteOrder.Uint32(serializedData[offset : offset+4]))
 		offset += 4
 		pubKey, _ := btcec.ParsePubKey(
 			serializedData[offset:offset+btcec.PubKeyBytesLenCompressed], btcec.S256())
 		offset += btcec.PubKeyBytesLenCompressed
-		wspKeyIdMap[keyID] = pubKey
+		aspKeyIdMap[keyID] = pubKey
 	}
 
-	return adminKeys, wspKeyIdMap, threadTips, lastKeyID, totalSupply, nil
+	return adminKeys, aspKeyIdMap, threadTips, lastKeyID, totalSupply, nil
 }
 
 // dbPutKeySet uses an existing database transaction to update the admin chain
@@ -1286,11 +1286,8 @@ func (b *BlockChain) createChainState() error {
 	b.stateSnapshot = newBestState(b.bestNode, blockSize, numTxns, numTxns,
 		b.bestNode.timestamp)
 
-	b.adminKeySets = btcec.DeepCopy(b.chainParams.AdminKeySets)
-	b.wspKeyIdMap = b.chainParams.WspKeyIdMap
-	b.threadTips = make(map[rmgutil.ThreadID]*wire.OutPoint)
-	b.lastKeyID = btcec.KeyID(0)
-	b.totalSupply = uint64(0)
+	b.adminKeySets = b.chainParams.AdminKeySets
+	b.aspKeyIdMap = b.chainParams.ASPKeyIdMap
 
 	// Initiate the utxo set with the admin thread tips from the genesis
 	// coinbase.
@@ -1303,11 +1300,18 @@ func (b *BlockChain) createChainState() error {
 	utxoView.connectTransaction(genesisBlock.Transactions()[0], 0, stxos)
 
 	// Initiate admin thread tips
-	//threadTips := make(map[rmgutil.ThreadID]*chainhash.Hash)
 	b.threadTips[rmgutil.RootThread] = wire.NewOutPoint(genesisBlock.Transactions()[0].Hash(), 0)
 	b.threadTips[rmgutil.ProvisionThread] = wire.NewOutPoint(genesisBlock.Transactions()[0].Hash(), 1)
 	b.threadTips[rmgutil.IssueThread] = wire.NewOutPoint(genesisBlock.Transactions()[0].Hash(), 2)
-	b.lastKeyID = btcec.KeyID(2)
+
+	// Set the last key id to the highest key id in the wsp key map.
+	var lastKeyID btcec.KeyID
+	for keyID := range b.aspKeyIdMap {
+		if keyID > lastKeyID {
+			lastKeyID = keyID
+		}
+	}
+	b.lastKeyID = btcec.KeyID(lastKeyID)
 
 	// Create the initial the database chain state including creating the
 	// necessary index buckets and inserting the genesis block.
@@ -1358,7 +1362,7 @@ func (b *BlockChain) createChainState() error {
 		}
 
 		// Store the current admin key sets in the database.
-		err = dbPutKeySet(dbTx, b.adminKeySets, b.wspKeyIdMap, b.threadTips, b.lastKeyID, 0)
+		err = dbPutKeySet(dbTx, b.adminKeySets, b.aspKeyIdMap, b.threadTips, b.lastKeyID, 0)
 		if err != nil {
 			return err
 		}
@@ -1396,7 +1400,7 @@ func (b *BlockChain) initChainState() error {
 			return nil
 		}
 		log.Tracef("Serialized admin state: %x", serializedKeys)
-		adminKeySets, wspKeyIdMap, threadTips, lastKeyID, totalSupply,
+		adminKeySets, aspKeyIdMap, threadTips, lastKeyID, totalSupply,
 			err := deserializeKeySet(serializedKeys)
 		if err != nil {
 			return err
@@ -1427,7 +1431,7 @@ func (b *BlockChain) initChainState() error {
 		b.lastKeyID = lastKeyID
 		b.totalSupply = totalSupply
 		b.adminKeySets = adminKeySets
-		b.wspKeyIdMap = wspKeyIdMap
+		b.aspKeyIdMap = aspKeyIdMap
 
 		// Add the new node to the indices for faster lookups.
 		prevHash := node.parentHash

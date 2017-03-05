@@ -1,4 +1,4 @@
-# RMGd Install
+# Prova Install
 
 ## Install Go
 
@@ -22,7 +22,7 @@ You should add a line to your PATH environment variable to include the GOPATH bi
 export PATH=$PATH:$GOPATH/bin
 ```
 
-## Clone RMGd
+## Clone Prova
 
 Make sure you have an SSH key registered with GitHub, then create in your `GOPATH` src/ directory the path `github.com/bitgo` and navigate to this path. There may be errors along this path, see below for how to resolve.
 
@@ -33,15 +33,15 @@ $ glide install
 $ go install
 ```
 
-When executing `go install` to install RMGd, make sure that you are in the GOPATH directory (github.com/bitgo/rmgd) otherwise it will give you an error instructing you to install from within your GOPATH directory.
+When executing `go install` to install Prova, make sure that you are in the GOPATH directory (github.com/bitgo/rmgd) otherwise it will give you an error instructing you to install from within your GOPATH directory.
 
 After you install you should be able to do `go test`, `go install` and this will successfully test the top level of rmgd and build it into the go/bin. Because the bin path is in your PATH you should be able to do `rmgd -h` successfully to confirm the app has been built and is in your path.
 
-## Run RMGd
+## Run Prova
 
-To run RMGd you will need a data directory to store the chain state. Create this directory where you like, like for testnet in your home directory you can create ~/testnet3/ - in this directory make a directory like `/1/` since you might want to work with multiple chain states.
+To run Prova you will need a data directory to store the chain state. Create this directory where you like, like for testnet in your home directory you can create ~/testnet3/ - in this directory make a directory like `/1/` if you want to work with multiple chain states.
 
-For RMGd in regtest simulating 2 nodes, create directories `~/regtest/1` and `~/regtest/2` and the following test.sh bash script can run two nodes against each other in regtest.
+For Prova in regtest simulating 2 nodes, create directories `~/regtest/1` and `~/regtest/2` and the following test.sh bash script can run two nodes against each other in regtest.
 
 ```
 #!/bin/bash 
@@ -54,7 +54,7 @@ sleep 1
 btcctl -u user -P pass -s 127.0.0.1:7001 generate 101
 ```
 
-For RMGd in testnet mode, create a ~/testnet3/1 directory, use the following command line arguments to start the testnet node and connect to the remote node.
+For Prova in testnet mode, create a ~/testnet3/1 directory, use the following command line arguments to start the testnet node and connect to the remote node.
 
 If you are on the internal dev VPN you can connect to a testnet node running master at 10.151.51.76:18333
 
@@ -80,7 +80,7 @@ If you want to confirm that everything is working in your build, you can create 
 
 In your home directory (or wherever you would like), create a new file `rmgpackages`
 
-Edit the file to include the contents (commented-out tests are known not passing):
+Edit the file to include the contents:
 
 ```
 github.com/bitgo/rmgd/addrmgr

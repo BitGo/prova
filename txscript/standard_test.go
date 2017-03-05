@@ -43,10 +43,10 @@ func mustParseShortForm(script string) []byte {
 	return s
 }
 
-func newAddressAztec(pkHash []byte, keyIDs []btcec.KeyID) rmgutil.Address {
-	addr, err := rmgutil.NewAddressAztec(pkHash, keyIDs, &chaincfg.MainNetParams)
+func newAddressProva(pkHash []byte, keyIDs []btcec.KeyID) rmgutil.Address {
+	addr, err := rmgutil.NewAddressProva(pkHash, keyIDs, &chaincfg.MainNetParams)
 	if err != nil {
-		panic("invalid aztec address in test source")
+		panic("invalid prova address in test source")
 	}
 
 	return addr
@@ -65,15 +65,15 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 		class   txscript.ScriptClass
 	}{
 		{
-			name: "standard aztec",
+			name: "standard prova",
 			script: decodeHex("521435dbbf04bca061e49dace08f858d87" +
 				"75c0a57c8e030000015153ba"),
 			addrs: []rmgutil.Address{
-				newAddressAztec(decodeHex("35dbbf04bca061e49dace08f858d8775c0a57c8e"),
+				newAddressProva(decodeHex("35dbbf04bca061e49dace08f858d8775c0a57c8e"),
 					[]btcec.KeyID{0x10000, 1}),
 			},
 			reqSigs: 2,
-			class:   txscript.AztecTy,
+			class:   txscript.ProvaTy,
 		},
 		{
 			name:    "empty script",
@@ -158,11 +158,11 @@ func TestPayToAddrScript(t *testing.T) {
 	t.Parallel()
 
 	// TCq7ZvyjTugZ3xDY8m1Mdgm95v4QmMpMfm3Fg8GCeE1uf
-	aztecTest, err := rmgutil.NewAddressAztec(
+	provaTest, err := rmgutil.NewAddressProva(
 		decodeHex("35dbbf04bca061e49dace08f858d8775c0a57c8e"),
 		[]btcec.KeyID{0x10000, 1}, &chaincfg.TestNet3Params)
 	if err != nil {
-		t.Errorf("Unable to create aztec address: %v", err)
+		t.Errorf("Unable to create prova address: %v", err)
 		return
 	}
 
@@ -173,13 +173,13 @@ func TestPayToAddrScript(t *testing.T) {
 	}{
 		// pay-to-pubkey-hash address on mainnet
 		{
-			aztecTest,
+			provaTest,
 			"521435dbbf04bca061e49dace08f858d8775c0a57c8e030000015153ba",
 			nil,
 		},
 
 		// Supported address types with nil pointers.
-		{(*rmgutil.AddressAztec)(nil), "", txscript.ErrUnsupportedAddress},
+		{(*rmgutil.AddressProva)(nil), "", txscript.ErrUnsupportedAddress},
 
 		// Unsupported address type.
 		{&bogusAddress{}, "", txscript.ErrUnsupportedAddress},

@@ -61,7 +61,7 @@ var genesisCoinbaseTx = wire.MsgTx{
 
 // genesisHash is the hash of the first block in the block chain for the main
 // network (genesis block).
-// TODO(aztec): Make this a constant rather than computed, once genesis block is finalized
+// TODO(prova): Make this a constant rather than computed, once genesis block is finalized
 var genesisHash = genesisBlock.Header.BlockHash()
 
 // merkleRoot calculates the merkle root of a genesis block from the coinbase.
@@ -108,7 +108,7 @@ var regTestGenesisBlock = wire.MsgBlock{
 		Timestamp:  time.Unix(1296688602, 0), // 2011-02-02 23:16:42 +0000 UTC
 		Bits:       0x200f0f0f,               // 537857807 [0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f]
 		Height:     0,
-		Size:       0, // TODO(aztec): fill in
+		Size:       0, // TODO(prova): fill in
 		Nonce:      9,
 	},
 	Transactions: []*wire.MsgTx{&genesisCoinbaseTx},
@@ -116,12 +116,12 @@ var regTestGenesisBlock = wire.MsgBlock{
 
 // regTestGenesisHash is the hash of the first block in the block chain for the
 // regression test network (genesis block).
-// TODO(aztec): Make this a constant rather than computed, once genesis block is finalized
+// TODO(prova): Make this a constant rather than computed, once genesis block is finalized
 var regTestGenesisHash = regTestGenesisBlock.Header.BlockHash()
 
 // testNet3GenesisHash is the hash of the first block in the block chain for the
 // test network (version 3).
-// TODO(aztec): Make this a constant rather than computed, once genesis block is finalized
+// TODO(prova): Make this a constant rather than computed, once genesis block is finalized
 var testNet3GenesisHash = testNet3GenesisBlock.Header.BlockHash()
 
 // testNet3GenesisMerkleRoot is the hash of the first transaction in the genesis

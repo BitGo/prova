@@ -1,0 +1,471 @@
+# Admin Transaction Examples
+
+## Table of Contents
+
+1. [Overview](#Overview)  
+2. [Issue Thread Transactions](#IssueThread)  
+2.1. [Issue Tokens](#IssueTransaction)  
+2.2. [De-Issue Tokens](#DeissueTransaction)  
+3. [Root Thread Transactions](#RootThread)  
+3.1 [Add Provision Key](#AddProvisionKeyTransaction)  
+3.2 [Revoke Provision Key](#RevokeProvisionKeyTransaction)  
+3.3 [Add Issue Key](#AddIssueKeyTransaction)  
+3.4 [Revoke Issue Key](#RevokeIssueKeyTransaction)  
+4. [Provision Thread Transactions](#ProvisionThread)  
+4.1 [Add Validate Key](#AddValidateKeyTransaction)  
+4.2 [Revoke Validate Key](#RevokeValidateKeyTransaction)  
+4.3 [Add ASP Key](#AddASPKeyTransaction)  
+4.4 [Revoke ASP Key](#RevokeASPKeyTransaction)  
+
+<a name="Overview"></a>
+
+## Overview
+
+Admin transactions are standard transactions that have special characteristics, are signed by special keys. There are two types of admin transactions: supply-mutation transactions that occur on the issue thread and key-mutation transactions that occur on the root and provision threads.
+
+<a name="IssueThread"></a>
+
+## Issue Thread Transactions
+
+Transactions on the issue thread add and revoke tokens from the total supply.
+
+<a name="IssueTransaction"></a>
+
+### Issue Tokens
+
+Issue new value.
+
+```
+// Pseudocode:
+{
+  "issue": [
+  {
+    "public_key_hashes": ["35dbbf04bca061e49dace08f858d8775c0a57c8e"],
+    "key_ids": [2, 1],
+    "required_keys": 2,
+    "value": 1000
+  },
+  {
+    "public_key_hashes": ["35dbbf04bca061e49dace08f858d8775c0a57c8e"], "key_ids": [1, 2],
+    "required_keys": 2,
+    "value": 1000
+  }],
+  "signing_keys": [
+    "919704a37e54d7a1d61aaf7eb92240e55a2615ef602e868e49b3200a0b6c5f98",
+    "ad5b0d82441dfc0fa695a393be224cb71277410ff0ae920758f4f97b9d3f59d2"
+  ]
+}
+```
+
+```
+// Signed Raw Hex:
+0100000001bdfff8ca2012f9d675d4e30a23f86ce38b4d4da893a59e1c97661aa302c1ac7700000000d521020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca483045022100e082b18fa9ed5a0655ea75dfba6a1f3a076adacac2ccdc828825c6bd29380c5402207814130f4390efe5b28404af4dc88d8b41535a4c5ad2d2ccc597357349f163c1012103337b5d7a1578f69270343a965eb5de2ea1fb8a38bd99f69b7c37b477e9ccbf6c473044022067c9d01704957931da8103903b150062798d271a077c36335949c8b25fbd30d102203c1e65df0abf355e89c721c6ef1f9294020aff9721dbcefe3dc54fa25cf8e4a201ffffffff0300000000000000000252bbe8030000000000001a521435dbbf04bca061e49dace08f858d8775c0a57c8e525153bae8030000000000001a521435dbbf04bca061e49dace08f858d8775c0a57c8e515253ba00000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 77acc102a31a66971c9ea593a84d4d8be36cf8230ae3d475d6f91220caf8ffbd:0
+  sequence: 4294967295
+  signature: 020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca 3045022100e082b18fa9ed5a0655ea75dfba6a1f3a076adacac2ccdc828825c6bd29380c5402207814130f4390efe5b28404af4dc88d8b41535a4c5ad2d2ccc597357349f163c101 03337b5d7a1578f69270343a965eb5de2ea1fb8a38bd99f69b7c37b477e9ccbf6c 3044022067c9d01704957931da8103903b150062798d271a077c36335949c8b25fbd30d102203c1e65df0abf355e89c721c6ef1f9294020aff9721dbcefe3dc54fa25cf8e4a201
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 2 op_checkthread
+  to hex: 52bb
+output 1
+  spending: 1000 tokens
+  to asm: 2 35dbbf04bca061e49dace08f858d8775c0a57c8e 2 1 3 op_checksafemultisig
+  to hex: 521435dbbf04bca061e49dace08f858d8775c0a57c8e525153ba
+output 2
+  spending: 1000 tokens
+  to asm: 2 35dbbf04bca061e49dace08f858d8775c0a57c8e 1 2 3 op_checksafemultisig
+  to hex: 521435dbbf04bca061e49dace08f858d8775c0a57c8e515253ba
+version: 1
+```
+
+<a name="DeissueTransaction"></a>
+
+### De-Issue Tokens
+
+Destroy existing value.
+
+```
+// Pseudocode
+{
+  "destroy": {
+    "output_index": 1,
+    "transaction_id": "092e24bf62bd5d59cf0432714500696ef6288d0ecc43d9970f9c2fdf2b8db277",
+    "value": 1000
+  },
+  "signing_keys": [
+    "2edbca7c596b1d6ac714678a9ab1352cbe80a2d28b9e3ed2f7b0ed759026cc52",
+    "ad5b0d82441dfc0fa695a393be224cb71277410ff0ae920758f4f97b9d3f59d2",
+    "eaf02ca348c524e6392655ba4d29603cd1a7347d9d65cfe93ce1ebffdca22694",
+    "2b8c52b77b327c755b9b375500d3f4b2da9b0a1ff65f6891d311fe94295bc26a"]
+  },
+  "spending_from_funds_transaction": "01000000014c9dd9330471c20c085cbfd7beeeb6641f25c40919bcee690d0119ac9a7b28bb00000000d42103337b5d7a1578f69270343a965eb5de2ea1fb8a38bd99f69b7c37b477e9ccbf6c473044022061d549ea958d3d972ae5cd1d4891ef38a0e91b0501e89c06224d807adfc1ac2602207e44a6caaa953bd207ccb3d718b0f1b77fd3afe117d728497e0375d2bbe8a3a401210333baa8beac868211a0af0617b223ffcef9e114d84839cc5c5b549680ac157eaf473044022052197995f8b4361949470c70df5baf220e95b6537e13c487d9f563a437ab9a89022046fda003c5b7044939ecf25fc0436379c7ed175cd44e670c0c2fdb07bad004aa01ffffffff0200000000000000000252bbe8030000000000001d521435dbbf04bca061e49dace08f858d8775c0a57c8e510300000153ba00000000",
+}
+```
+
+```
+// Unsigned Raw Hex:
+010000000277b28d2bdf2f9c0f97d943cc0e8d28f66e690045713204cf595dbd62bf242e090000000000ffffffff77b28d2bdf2f9c0f97d943cc0e8d28f66e690045713204cf595dbd62bf242e090100000000ffffffff0200000000000000000252bbe803000000000000016a00000000
+```
+
+```
+// Signed Raw Hex:
+010000000277b28d2bdf2f9c0f97d943cc0e8d28f66e690045713204cf595dbd62bf242e0900000000d52103337b5d7a1578f69270343a965eb5de2ea1fb8a38bd99f69b7c37b477e9ccbf6c483045022100a52243be501e2cf0cbe531eb77421242a8b85b1eeecf3aed77c0f9d93b20bda5022069a660fee1998b4734fb591a47a4cbb220958cca71258538a9d29731082c6b7801210333baa8beac868211a0af0617b223ffcef9e114d84839cc5c5b549680ac157eaf473044022079e727c12659776a6e214d93c7aaca178de45d0e688ed7f7807944627ba68bfb022025de2a95bf53ded134efeae720d7f01cb7eac0027fcf30de547ac4f6eba1236001ffffffff77b28d2bdf2f9c0f97d943cc0e8d28f66e690045713204cf595dbd62bf242e0901000000d521038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a820247304402200d195602c0f48e6a90d4e9ef08d56ca2826c6abdfd1a9b63ab351c8b8f4fe22402203c34c433b7ed7feabb4dfa5a4407c22c1aa4356503eaaa988af7e01a11e140280121025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf148304502210093a7c6f900d7d98659524da9d25e870d9389431d5ab2a0301fed02da2b35f09d02205266215e0bdf7de20901c408f3a141ea7aacfd14f5e11e0283034f60381d027401ffffffff0200000000000000000252bbe803000000000000016a00000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 092e24bf62bd5d59cf0432714500696ef6288d0ecc43d9970f9c2fdf2b8db277:0
+  sequence: 4294967295
+  signature: 03337b5d7a1578f69270343a965eb5de2ea1fb8a38bd99f69b7c37b477e9ccbf6c 3045022100a52243be501e2cf0cbe531eb77421242a8b85b1eeecf3aed77c0f9d93b20bda5022069a660fee1998b4734fb591a47a4cbb220958cca71258538a9d29731082c6b7801 0333baa8beac868211a0af0617b223ffcef9e114d84839cc5c5b549680ac157eaf 3044022079e727c12659776a6e214d93c7aaca178de45d0e688ed7f7807944627ba68bfb022025de2a95bf53ded134efeae720d7f01cb7eac0027fcf30de547ac4f6eba1236001
+input: 1
+  spending outpoint: 092e24bf62bd5d59cf0432714500696ef6288d0ecc43d9970f9c2fdf2b8db277:1
+  sequence: 4294967295
+  signature: 038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202 304402200d195602c0f48e6a90d4e9ef08d56ca2826c6abdfd1a9b63ab351c8b8f4fe22402203c34c433b7ed7feabb4dfa5a4407c22c1aa4356503eaaa988af7e01a11e1402801 025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1 304502210093a7c6f900d7d98659524da9d25e870d9389431d5ab2a0301fed02da2b35f09d02205266215e0bdf7de20901c408f3a141ea7aacfd14f5e11e0283034f60381d027401
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 2 op_checkthread
+  to hex: 52bb
+output 1
+  spending: 1000 tokens
+  to asm: op_return
+  to hex: 6a
+version: 1
+```
+
+<a name="RootThread"></a>
+
+## Root Thread
+
+Adding and revoking issue and provision keys occurs on the root thread.
+
+<a name="AddProvisionKeyTransaction"></a>
+
+### Add Provison Key
+
+To add a new **provision** key, sign a provision transaction with two valid root keys:
+
+```
+// Pseudocode
+// Add provision key with private key: 3dc7084a02bc498c1f7aa049b30ddd33e33d1fb27aa9ecccc4abd457ad5995ac
+{
+  "signing_keys": [
+    "eaf02ca348c524e6392655ba4d29603cd1a7347d9d65cfe93ce1ebffdca22694",     
+    "2b8c52b77b327c755b9b375500d3f4b2da9b0a1ff65f6891d311fe94295bc26a"
+  ],
+  "enable": true,
+  "provisionkey": "02004d701e48575465f2bb5fb37fc3ce9296c9aa48f4abf1fd9f16c687c5e6cef4"
+}
+```
+
+```
+// Signed Raw Hex:
+0100000001f98825ba8bdfe266a30dfd7cfd9c8f72446e6a0d2df0e75d99e6b0c810eb0a6500000000d621025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1483045022100af7867cbbf00852e20738f2ea5b24828f29b29827c472b276e1dbb6cb867f9ba0220275f7e67726ff831debef99e873a69fcbedfd0dde9e407029fc4282bc6da86140121038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202483045022100bb52d5a9b121012477d9b0681c72fa70f1016124ba784bd00b11fd127be03a0f02201ad31fd8b0d7b4bc9e04a9ffd9d7262d3b4114b10cb21c3d47b5c93ca40e9af801ffffffff0200000000000000000200bb0000000000000000246a220302004d701e48575465f2bb5fb37fc3ce9296c9aa48f4abf1fd9f16c687c5e6cef400000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 650aeb10c8b0e6995de7f02d0d6a6e44728f9cfd7cfd0da366e2df8bba2588f9:0
+  sequence: 4294967295
+  signature: 025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1 3045022100af7867cbbf00852e20738f2ea5b24828f29b29827c472b276e1dbb6cb867f9ba0220275f7e67726ff831debef99e873a69fcbedfd0dde9e407029fc4282bc6da861401 038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202 3045022100bb52d5a9b121012477d9b0681c72fa70f1016124ba784bd00b11fd127be03a0f02201ad31fd8b0d7b4bc9e04a9ffd9d7262d3b4114b10cb21c3d47b5c93ca40e9af801
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 0 op_checkthread
+  to hex: 00bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 0302004d701e48575465f2bb5fb37fc3ce9296c9aa48f4abf1fd9f16c687c5e6cef4
+  to hex: 6a220302004d701e48575465f2bb5fb37fc3ce9296c9aa48f4abf1fd9f16c687c5e6cef4
+  provision op: add_provision_key 02004d701e48575465f2bb5fb37fc3ce9296c9aa48f4abf1fd9f16c687c5e6cef4
+version: 1
+```
+
+<a name="RevokeProvisionKeyTransaction"></a>
+
+### Revoke Provison Key
+
+To revoke an existing **provision** key, sign a revoke provision transaction with two valid root keys:
+
+```
+// Psuedocode:
+{
+  "signing_keys": [
+    "eaf02ca348c524e6392655ba4d29603cd1a7347d9d65cfe93ce1ebffdca22694",
+    "2b8c52b77b327c755b9b375500d3f4b2da9b0a1ff65f6891d311fe94295bc26a"
+  ],
+  "enable": false,
+  "provisionkey": "0200295212c3de38cf8bd760450779f8a9bf48c3810115036701c41afdfd256341"
+}
+```
+
+```
+// Signed Raw Hex:
+01000000011ec38ba4c2df4e855df9f419d00ef24a77eb99288aa85debc643356a8990fb0400000000d521025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1483045022100acebf8e97cbb0d0288e797bbbe371096a42b90e8a99271d236cca732a2bb439c02204cfdec9ff67004faf9203074f27ebe2e98e0cb1eb83770510ef1f849d242b4a80121038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202473044022017d545e9b0c3a6be9fe4676d4a767ec3213786b49dd2e9e6faa89d8ba90cd77f02203d18fa358d146979dd8163f7010379dc6de3a4e80baacaabef658890ac1dc50801ffffffff0200000000000000000200bb0000000000000000246a22040200295212c3de38cf8bd760450779f8a9bf48c3810115036701c41afdfd25634100000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 04fb90896a3543c6eb5da88a2899eb774af20ed019f4f95d854edfc2a48bc31e:0
+  sequence: 4294967295
+  signature: 025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1 3045022100acebf8e97cbb0d0288e797bbbe371096a42b90e8a99271d236cca732a2bb439c02204cfdec9ff67004faf9203074f27ebe2e98e0cb1eb83770510ef1f849d242b4a801 038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202 3044022017d545e9b0c3a6be9fe4676d4a767ec3213786b49dd2e9e6faa89d8ba90cd77f02203d18fa358d146979dd8163f7010379dc6de3a4e80baacaabef658890ac1dc50801
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 0 op_checkthread
+  to hex: 00bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 040200295212c3de38cf8bd760450779f8a9bf48c3810115036701c41afdfd256341
+  to hex: 6a22040200295212c3de38cf8bd760450779f8a9bf48c3810115036701c41afdfd256341
+  provision op: revoke_provision_key 0200295212c3de38cf8bd760450779f8a9bf48c3810115036701c41afdfd256341
+version: 1
+```
+
+<a name="AddIssueKeyTransaction"></a>
+
+### Add Issue Key
+
+To add a new **issue** key, sign an add issue key transaction with two valid root keys:
+
+```
+// Pseudocode:
+// Add issue key with private key 919704a37e54d7a1d61aaf7eb92240e55a2615ef602e868e49b3200a0b6c5f98
+{
+  "signing_keys": [
+    "eaf02ca348c524e6392655ba4d29603cd1a7347d9d65cfe93ce1ebffdca22694", 
+    "2b8c52b77b327c755b9b375500d3f4b2da9b0a1ff65f6891d311fe94295bc26a"
+  ],
+  "enable": true,
+  "issuekey": "020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca"
+}
+```
+
+```
+Signed Raw Hex: 
+0100000001da7481426af85773b0a48f5eb84980a421640f90f9dc7ba91b49b582ee8eefd700000000d521025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf14830450221009184357a45c7067214b8613c7287a1de381e37b91280a0e85bc0a00586b7b0df0220468f10e6bd7476982212bd1b1d03e5b607e03bfa7f8ac90f3021b4279bc1b6490121038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a82024730440220352368418ff22a5d7d733565051a9683333b46da87e6bd98d3edcba30289669a02204c8f3d6f4c7c99b20e1727786b6006ff89da5da5bf4581b98d3bb9bf71dcde9001ffffffff0200000000000000000200bb0000000000000000246a2201020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca00000000
+```
+
+```
+Parsed Transaction:
+input: 0
+  spending outpoint: d7ef8eee82b5491ba97bdcf9900f6421a48049b85e8fa4b07357f86a428174da:0
+  sequence: 4294967295
+  signature: 025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1 30450221009184357a45c7067214b8613c7287a1de381e37b91280a0e85bc0a00586b7b0df0220468f10e6bd7476982212bd1b1d03e5b607e03bfa7f8ac90f3021b4279bc1b64901 038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202 30440220352368418ff22a5d7d733565051a9683333b46da87e6bd98d3edcba30289669a02204c8f3d6f4c7c99b20e1727786b6006ff89da5da5bf4581b98d3bb9bf71dcde9001
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 0 op_checkthread
+  to hex: 00bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 01020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca
+  to hex: 6a2201020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca
+  provision op: add_issue_key 020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca
+version: 1
+```
+
+<a name="RevokeIssueKeyTransaction"></a>
+
+### Revoke Issue Key
+
+To revoke an existing **issue** key, sign a revoke issue key transaction with two valid root keys:
+
+```
+// Pseudocode:
+{
+  "signing_keys": [
+    "eaf02ca348c524e6392655ba4d29603cd1a7347d9d65cfe93ce1ebffdca22694",
+    "2b8c52b77b327c755b9b375500d3f4b2da9b0a1ff65f6891d311fe94295bc26a"
+  ],
+  "enable": false,
+  "issuekey": "020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca"
+}
+```
+
+```
+// Signed Raw Hex:
+01000000014fced0d1787e7d7e39a6861fdd36eb5c7d4cbfc4e613b2afc53c1a6578dafbe400000000d521025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf147304402207704337460dc1169aea2d23659da63a63adf8d21c269ac6b5f0bea697638ffd102203fed14fb153bb738ec960af8ad425451fbac4cb9f10bc6d88277b967c8640e870121038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202483045022100cf0ee32a9785275f96921bbcb72aeee5cd42f8ab5fdd78184ad69a91ad582a2f02202ec00673b1b0e4f87290191892c5c8470d9399e19f5db6cd7b9f310611c616bc01ffffffff0200000000000000000200bb0000000000000000246a2202020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca00000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: e4fbda78651a3cc5afb213e6c4bf4c7d5ceb36dd1f86a6397e7d7e78d1d0ce4f:0
+  sequence: 4294967295
+  signature: 025ceeba2ab4a635df2c0301a3d773da06ac5a18a7c3e0d09a795d7e57d233edf1 304402207704337460dc1169aea2d23659da63a63adf8d21c269ac6b5f0bea697638ffd102203fed14fb153bb738ec960af8ad425451fbac4cb9f10bc6d88277b967c8640e8701 038ef4a121bcaf1b1f175557a12896f8bc93b095e84817f90e9a901cd2113a8202 3045022100cf0ee32a9785275f96921bbcb72aeee5cd42f8ab5fdd78184ad69a91ad582a2f02202ec00673b1b0e4f87290191892c5c8470d9399e19f5db6cd7b9f310611c616bc01
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 0 op_checkthread
+  to hex: 00bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 02020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca
+  to hex: 6a2202020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca
+  provision op: revoke_issue_key 020064c9594983b12305c7ed4e27166774cf173feec057b4dd7fcf2e6a3a3571ca
+version: 1
+```
+
+<a name="ProvisionThread"></a>
+
+## Provision Thread
+
+The provision thread is used to add and revoke validate and asp keys.
+
+<a name="AddValidateKeyTransaction"></a>
+
+### Add Validate Key
+
+To add a new **validate** key, sign an add validate key transaction with two valid provision keys:
+
+```
+// Pseudocode:
+// Add validate key with private key b431de6328907757f73690a731d67577aeccf3dc6df2469f939fa68555a27b24
+{
+  "signing_keys": [
+    "960a5df5441d8fe0099d7fdb0352dcd11f64ac5f2ecdd896adf21b1649eacc7c",
+    "38e202bcac34dc18baaef01113c54a03b9b9641ddfab883f6f9dde26bdac83b4"
+  ],
+  "enable": true,
+  "validatekey": "02004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c"
+}
+```
+
+```
+// Signed Raw Transaction:
+0100000001a5e752fa62c4c6ec7fca93f5c57af16ee803c2575487f7dc6bfc8099ac16910f01000000d521020085b6b5ca4a6a2fe86db0407800268487a2aa277268dd1267f84360dc2d389a483045022100e41fd96ddf56c6f43a5e29be74311f572414bd8c51a5de3ba1bfbcd4736098ba02205f7d5f519fffc2c291c9eaf843aab36ba84da69485a785e65efec56f3945c63b01210200f0a4f78a234a15e18f8f5b975d6e276951179d67f6e052670d3f486c15ad5e47304402202ba600951aa8feb014bdd512e006d8c5ad7af81632ec8c212efd72e61abcede902201901144c1c234828ec96921e9f1938b12b2a38fb58066bb767f3d78cfe44381101ffffffff0200000000000000000251bb0000000000000000246a221102004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c00000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 0f9116ac9980fc6bdcf7875457c203e86ef17ac5f593ca7fecc6c462fa52e7a5:1
+  sequence: 4294967295
+  signature: 020085b6b5ca4a6a2fe86db0407800268487a2aa277268dd1267f84360dc2d389a 3045022100e41fd96ddf56c6f43a5e29be74311f572414bd8c51a5de3ba1bfbcd4736098ba02205f7d5f519fffc2c291c9eaf843aab36ba84da69485a785e65efec56f3945c63b01 0200f0a4f78a234a15e18f8f5b975d6e276951179d67f6e052670d3f486c15ad5e 304402202ba600951aa8feb014bdd512e006d8c5ad7af81632ec8c212efd72e61abcede902201901144c1c234828ec96921e9f1938b12b2a38fb58066bb767f3d78cfe44381101
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 1 op_checkthread
+  to hex: 51bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 1102004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c
+  to hex: 6a221102004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c
+  provision op: add_validate_key 02004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c
+version: 1
+```
+
+<a name="RevokeValidateKeyTransaction"></a>
+
+### Revoke Validate Key
+
+To revoke an existing **validate** key, sign a revoke validate key transaction with two valid provision keys:
+
+```
+// Pseudocode:
+{
+  "signing_keys": [
+    "960a5df5441d8fe0099d7fdb0352dcd11f64ac5f2ecdd896adf21b1649eacc7c",
+    "38e202bcac34dc18baaef01113c54a03b9b9641ddfab883f6f9dde26bdac83b4"
+  ],
+  "enable": false,
+  "validatekey": "02004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c"
+}
+```
+
+```
+// Signed Raw Transaction:
+0100000001861b626ba0fd3f6b55c287fa637dc9330aac240329b69bb1e2656af9f64dae6900000000d521020085b6b5ca4a6a2fe86db0407800268487a2aa277268dd1267f84360dc2d389a483045022100e8a877a85ae9c7211b41265078ea3b0dfbc2b96115ef1bac753caef8faacb77102201a2c77f16767b333af92dcf79da9b7a44f9e0e24f31697dc3b0c2fec5e5f472101210200f0a4f78a234a15e18f8f5b975d6e276951179d67f6e052670d3f486c15ad5e473044022017f8ebe4f61abe5c61f4225a478bf30284b1c7d26904d48cad7144c0b783370b0220339d78afef75c72e88562eba8ef35b6caee059d26682fcf424b10361af655eac01ffffffff0200000000000000000251bb0000000000000000246a221202004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c00000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 69ae4df6f96a65e2b19bb6290324ac0a33c97d63fa87c2556b3ffda06b621b86:0
+  sequence: 4294967295
+  signature: 020085b6b5ca4a6a2fe86db0407800268487a2aa277268dd1267f84360dc2d389a 3045022100e8a877a85ae9c7211b41265078ea3b0dfbc2b96115ef1bac753caef8faacb77102201a2c77f16767b333af92dcf79da9b7a44f9e0e24f31697dc3b0c2fec5e5f472101 0200f0a4f78a234a15e18f8f5b975d6e276951179d67f6e052670d3f486c15ad5e 3044022017f8ebe4f61abe5c61f4225a478bf30284b1c7d26904d48cad7144c0b783370b0220339d78afef75c72e88562eba8ef35b6caee059d26682fcf424b10361af655eac01
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 1 op_checkthread
+  to hex: 51bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 1202004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c
+  to hex: 6a221202004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c
+  provision op: revoke_validate_key 02004766fa5eab4fd46c1a66740929e59cf3ed57fde8cb835b206605abc2e31a3c
+version: 1
+```
+
+<a name="AddASPKeyTransaction"></a>
+
+### Add ASP Key
+
+To add a new **ASP** key, sign an add ASP key transaction with two valid provision keys:
+
+```
+// Pseudocode:
+{
+  "signing_keys": [
+    "960a5df5441d8fe0099d7fdb0352dcd11f64ac5f2ecdd896adf21b1649eacc7c",
+    "38e202bcac34dc18baaef01113c54a03b9b9641ddfab883f6f9dde26bdac83b4"
+  ],
+  "enable": true,
+  "aspkey": {
+    "keyId": 3,
+    "publicKey": "02005b0c2cdbc01976eea3dc3e67815c79967e0175fa59e3e67fbe949bf6420f85"
+  }
+}
+```
+
+```
+// Signed Raw Transaction:
+0100000001a5e752fa62c4c6ec7fca93f5c57af16ee803c2575487f7dc6bfc8099ac16910f01000000d621020085b6b5ca4a6a2fe86db0407800268487a2aa277268dd1267f84360dc2d389a483045022100a98f328337589d383aea052ddcaf5a04dfc7b8eff4a40e9763b3a928d045e7160220190a92a150ed804a4476e8f1be8f8a8593aa5af1db533b43d07e0250c82ef4a701210200f0a4f78a234a15e18f8f5b975d6e276951179d67f6e052670d3f486c15ad5e483045022100aff546a9d7b8afd3dba82b5b5bdb2558486c28ae37bceec6b4f9966547c4e98702207990906d81e0bbe18f0f5896778f507c3771abf962297d9ee6d78490cad18d1201ffffffff0200000000000000000251bb0000000000000000286a261302005b0c2cdbc01976eea3dc3e67815c79967e0175fa59e3e67fbe949bf6420f850300000000000000
+```
+
+```
+// Parsed Transaction:
+input: 0
+  spending outpoint: 0f9116ac9980fc6bdcf7875457c203e86ef17ac5f593ca7fecc6c462fa52e7a5:1
+  sequence: 4294967295
+  signature: 020085b6b5ca4a6a2fe86db0407800268487a2aa277268dd1267f84360dc2d389a 3045022100a98f328337589d383aea052ddcaf5a04dfc7b8eff4a40e9763b3a928d045e7160220190a92a150ed804a4476e8f1be8f8a8593aa5af1db533b43d07e0250c82ef4a701 0200f0a4f78a234a15e18f8f5b975d6e276951179d67f6e052670d3f486c15ad5e 3045022100aff546a9d7b8afd3dba82b5b5bdb2558486c28ae37bceec6b4f9966547c4e98702207990906d81e0bbe18f0f5896778f507c3771abf962297d9ee6d78490cad18d1201
+locktime: height(0)
+output 0
+  spending: 0 tokens
+  to asm: 1 op_checkthread
+  to hex: 51bb
+output 1
+  spending: 0 tokens
+  to asm: op_return 1302005b0c2cdbc01976eea3dc3e67815c79967e0175fa59e3e67fbe949bf6420f8503000000
+  to hex: 6a261302005b0c2cdbc01976eea3dc3e67815c79967e0175fa59e3e67fbe949bf6420f8503000000
+  provision op: add_wsp_key 02005b0c2cdbc01976eea3dc3e67815c79967e0175fa59e3e67fbe949bf6420f85
+version: 1
+```
+
+<a name="RevokeASPKeyTransaction"></a>
+
+### Revoke ASP Key
+
+To revoke an existing **ASP** key, sign an add ASP key transaction with two valid provision keys:
+
+```
+// Pseudocode
+```
+
+```
+// Signed Raw Transaction
+```
+
+```
+// Parsed Transaction
+```

@@ -200,10 +200,10 @@ const (
 	ErrInconsistentBlkSize
 
 	// ErrInvalidCoinbase indicates the coinbase transaction is not
-	// a proper standard Aztec transaction.
+	// a proper standard Prova transaction.
 	ErrInvalidCoinbase
 
-	// ErrInvalidTx indicates a transaction is not an allowed Aztec
+	// ErrInvalidTx indicates a transaction is not an allowed Prova
 	// transaction.
 	ErrInvalidTx
 

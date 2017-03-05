@@ -79,28 +79,6 @@ func TestChainSvrCmds(t *testing.T) {
 				LockTime: btcjson.Int64(12312333333),
 			},
 		},
-
-		{
-			name: "createrawadmintransaction",
-			newCmd: func() (interface{}, error) {
-				return btcjson.NewCmd("createrawadmintransaction", "123",
-					"issuing", true, "456")
-			},
-			staticCmd: func() interface{} {
-				txid := "123"
-				keyType := "issuing"
-				pubKey := "456"
-				active := true
-				return btcjson.NewCreateRawAdminTransactionCmd(txid, keyType, active, pubKey, nil)
-			},
-			marshalled: `{"jsonrpc":"1.0","method":"createrawadmintransaction","params":["123","issuing",true,"456"],"id":1}`,
-			unmarshalled: &btcjson.CreateRawAdminTransactionCmd{
-				Txid:    "123",
-				KeyType: "issuing",
-				PubKey:  "456",
-				Active:  true,
-			},
-		},
 		{
 			name: "decoderawtransaction",
 			newCmd: func() (interface{}, error) {

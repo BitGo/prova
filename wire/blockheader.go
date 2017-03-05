@@ -18,7 +18,7 @@ import (
 const BlockValidatingPubKeySize = 33
 
 // BlockValidatingPubKey defines the block validating public key.
-// TODO(aztec): replace this with a struct
+// TODO(prova): replace this with a struct
 type BlockValidatingPubKey [BlockValidatingPubKeySize]byte
 
 // String returns a hexadecimal string of the public key
@@ -30,7 +30,7 @@ func (p BlockValidatingPubKey) String() string {
 const BlockSignatureSize = 80
 
 // BlockSignature defines the block validating signature.
-// TODO(aztec): replace this with a struct
+// TODO(prova): replace this with a struct
 type BlockSignature [BlockSignatureSize]byte
 
 // String returns a hexadecimal string of the signature
@@ -39,7 +39,7 @@ func (s BlockSignature) String() string {
 }
 
 // BlockVersion is the current latest supported block version.
-// TODO(aztec): change this
+// TODO(prova): change this
 const BlockVersion = 4
 
 // MaxBlockHeaderPayload is the maximum number of bytes a block header can be.
@@ -151,7 +151,7 @@ func (h *BlockHeader) Sign(key *btcec.PrivateKey) error {
 		return err
 	}
 	serialized := signature.Serialize()
-	// TODO(aztec): Remove commented code.
+	// TODO(prova): Remove commented code.
 	// log.Printf("SIGNED hash=%v sig=%v prevblock=%v merkle=%v ",
 	// 	hex.EncodeToString(hash),
 	// 	hex.EncodeToString(serialized),
