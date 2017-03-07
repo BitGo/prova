@@ -120,7 +120,7 @@ ASP_KEY_REVOKE <asp pub key> <key id>
 When encoded into a transaction, the operations and their keys will be represented as:
 
 ```
-<operation (1 byte)> <compressed public key (33-bytes)> <key id (only for ASPs): 4-bytes>
+<operation (1 byte)> <compressed public key (33-bytes)> <key id (only for ASPs): 4 bytes>
 ```
 
 ### Example Transaction
