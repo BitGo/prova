@@ -1,7 +1,31 @@
 Prova
 ====
 
-Prova is a distributed consensus system for asset token exchange written in Go (golang), based on [btcd](https://github.com/btcsuite/btcd).
+Prova is a distributed consensus system for digital asset tokens written in Go (golang).
+Prova was built to support RMG, a digitized form of gold introduced by [The Royal Mint](http://www.royalmint.com/rmg)
+and CME Group.  Features include:
+
+ * Asset Issuance
+
+   Prova is a simple, single asset blockchain with asset issuance rather than mining.
+
+ * Multi-signature only
+
+   All accounts are multi-signature wallets.
+
+ * No “black holes”
+
+   The system enforces rules making it impossible to send to invalid or non-recoverable addresses
+
+ * Permissioned Participants
+
+   Prova can enforce only authorized validators and accounts.
+
+ * Trusted Technology
+
+   Prova is based on mature blockchain technologies.
+
+   The implementation is derived from [btcd](https://github.com/btcsuite/btcd).
 
 It downloads, validates, and serves a block chain using consensus rules for block acceptance.  It includes a full block validation testing framework.
 
