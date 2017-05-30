@@ -47,7 +47,7 @@ Instead of deterministic blocks, miners could be given deterministic time window
 
 Pros:
 
-- A time round-robin may closely model the desired behavior of every miner getting a turn at bat.
+- A time round-robin may closely model the desired behaviour of every miner getting a turn at bat.
 - It should be simple to fairly evaluate in a stateless manner whether hashing should proceed and whether a block is valid
 
 Cons:
@@ -69,7 +69,7 @@ Cons:
 - Breaks the concept of "most work chain" as the correct chain
 - Requires storing and synchronizing individualized difficulties
 
-## Unwanted Behavior
+## Unwanted Behaviour
 
 1. Small percentage of non representative miners are super efficient: what if the first portion of the difficulty period has super fast blocks and the final portion has super slow blocks?
 2. What if there are not enough miners mining to complete a mining cycle?
