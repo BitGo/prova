@@ -76,7 +76,7 @@ $ go get -u github.com/Masterminds/glide
 $ git clone https://github.com/bitgo/prova $GOPATH/src/github.com/bitgo/prova
 $ cd $GOPATH/src/github.com/bitgo/prova
 $ glide install
-$ go install . ./cmd/...
+$ go install
 ```
 
 - Prova (and utilities) will now be installed in ```$GOPATH/bin```.  If you did
@@ -92,7 +92,7 @@ $ go install . ./cmd/...
 ```bash
 $ cd $GOPATH/src/github.com/bitgo/prova
 $ git pull && glide install
-$ go install . ./cmd/...
+$ go install
 ```
 
 ## Getting Started
