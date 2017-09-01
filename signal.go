@@ -40,7 +40,7 @@ func interruptListener() <-chan struct{} {
 		close(c)
 
 		// Listen for repeated signals and display a message so the user
-		// knows the shutdown is in progress and the process is not
+		// knows the shutdown is in progress and the process has not
 		// hung.
 		for {
 			select {
