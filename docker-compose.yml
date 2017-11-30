@@ -25,12 +25,18 @@ services:
     # The directory of the Dockerfile to use when building this image (current dir)
     build: .
 
-    #
+    ##
     # To apply a configuration file to the docker container...
     # 1 - Create a copy of 'sample-prova.conf' (In the project root directory)
     # 2 - Rename the copied file: 'prova.conf'
     # 3 - Update the file contents as applicable
-    # 4 - Uncomment the lines below:
+    # 4 - Uncomment the 2 lines below:
     #
     # volumes:
     #   - ./prova.conf:/root/.prova/prova.conf
+
+    ##
+    # To connect to the main network (instead of the default testnet)
+    # 1 - Uncomment the line below:
+    #
+    # command: prova
