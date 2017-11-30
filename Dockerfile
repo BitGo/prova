@@ -25,7 +25,7 @@ COPY . .
 RUN glide install
 
 # Install Prova
-RUN go install
+RUN go install . ./cmd/...
 
 # Run Prova (uses the testnet by default)
 CMD prova --testnet
