@@ -5,7 +5,10 @@
 # docker-compose build --no-cache --force-rm  | Build the container from scratch and remove intermediary containers
 # docker-compose up                           | Bring up the container
 # docker-compose down                         | Take down the container
-# docker-compose logs                         | View the Prova logs
+#
+# docker exec -it prova /bin/sh               | Attach to the container's shell to run commands
+# docker exec prova [command]                 | Run a single command on the container (from $GOPATH/src/github.com/bitgo/prova)
+# docker logs prova [-f] [--tail 500]         | View the prova logs [follow] [show tail]
 #
 
 # Allows older versions of Docker
@@ -26,17 +29,15 @@ services:
     build: .
 
     ##
-    # To apply a configuration file to the docker container...
-    # 1 - Create a copy of 'sample-prova.conf' (In the project root directory)
-    # 2 - Rename the copied file: 'prova.conf'
-    # 3 - Update the file contents as applicable
-    # 4 - Uncomment the 2 lines below:
-    #
+    # To mount the 'prova.conf' and 'provactl.conf' files to the container
+    # - Create the config files in the project root
+    # - Uncomment the lines below
     # volumes:
     #   - ./prova.conf:/root/.prova/prova.conf
+    #   - ./provactl.conf:/root/.provactl/provactl.conf
 
     ##
     # To connect to the main network (instead of the default testnet)
-    # 1 - Uncomment the line below:
+    # - Uncomment the line below:
     #
     # command: prova
